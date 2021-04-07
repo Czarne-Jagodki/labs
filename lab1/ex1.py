@@ -32,7 +32,7 @@ def from_list_to_matrix_neighbour(list):
     print_matrix(matrix)
     return matrix
 
-from_list_to_matrix_neighbour(neighbour_list)
+#from_list_to_matrix_neighbour(neighbour_list)
 
 def from_matrix_neighbour_to_list(matrix):
     list = {}
