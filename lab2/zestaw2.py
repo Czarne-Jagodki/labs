@@ -94,97 +94,89 @@ def check_matrix_correctness(matrix, degrees):
             errorsArr.append(i)
     return errorsArr
 
-# Funkcja tworząca graf k-regularny
-# Przyjmuje k - stopień pojedyńczego wierzchołka, numOfVertices - liczbę wierzchołków
-# Zwraca macierz lub -1 jeśli nie można utworzyć macierzy
-def generate_k_regular_graph(k, numOfVertices):
-    # Inicjalizacja pustej tablicy do przechowywania stopni wierzchołków
-    arr = []
-    # Przypisanie do tablicy odpowiednich stopni wierzchołków
-    for i in range(numOfVertices):
-        arr.append(k)
-    # Skopiowanie tablicy
-    copy = arr.copy()
-    # Inicjalizacja macierzy reprezentującej graf
-    matrix = [[0 for i in range(len(copy))] for j in range(len(copy))]
-    # Inicjalizacja licznika
-    counter = 0
-    # Inicjalizacja kroku
-    step = 1
-    # Inicjalizacja iteratora przechodzącego po wartościach ciągu graficznego 
-    idx = 0
-    # Sprawdzenie czy ciąg jest ciągiem graficznym
-    if degree_seq(arr):
-        # W każdym kroku przechodzi po kolejnym wierzchołku tworzonej macierzy 
-        for step in range(0, len(copy)):
-            # Sprawdzenie ile krawędzi wychodzi z aktualnie odwiedzanego wierzchołka 
-            counter = sum(matrix[step])
-            # Nowe krawędzie dodawane są od obecnego wierzchołka do "większych" wartością wierzchołków, aby nie zmieniać stopnia już odwiedzonych wierzchołków
-            for i in range(step+1, len(copy)):
-                    # Jeżeli stopień aktualnie odwiedzanego wierzchołka na to pozwala, to tworzy się nową krawędź
-                    if sum(matrix[i]) < copy[i]:
-                        # Sprawdzenie stopnia drugiego wierzchołka nowo utworzonej krawędzi
-                        if counter < copy[idx]:
-                            matrix[step][i] = 1
-                            matrix[i][step] = 1
-                            # Inkrementacja stopnia obenie odwiedzanej krawędzi
-                            counter = counter + 1        
-            # Przejście do kolejnego wierzchołka w ciągu graficznym
-            idx = idx + 1
-        #Zmienna pomocnicza określająca czy została zmieniona krawędź
-        changed = False
-        # Tablica przechowująca indeksy wierzchołków, które mają nieprawidłowe stopnie
-        errors = check_matrix_correctness(matrix, copy)
-        # Dopóki występują wierzchołki, które mają złe ilości krawędzi z nich wychodzących
-        while not len(errors) == 0:
-            # Dla każdego elementu w tablicy błędnych wierzchołków
+# Funkcja naprawiająca macierze, które mają nieprawidłowe stopnie wierzchołków
+# Przyjmuje jako argument macierz sąsiedztwa reprezentującą graf oraz ciąg graficzny
+# Funkcja działa tylko na przekazanej do niej macierzy - nic nie zwraca
+def repair_matrix(matrix, copy):
+    # Sprawdzenie czy są wierzchołki o błędnych stopniach
+    errors = check_matrix_correctness(matrix, copy)
+    while not len(errors) == 0:
+        # To jest specjalny przypadek dla macierzy o stopniach np. [2, 2, 2, 2, 2]
+        # W powyższym przypadku kod w else się zapętla (nie umiem tego wytłumaczyć)
+        if len(errors) % 2 == 0 and sum(matrix[errors[0]]) != sum(matrix[errors[1]]):
+                firstIdx = -1
+                secondIdx = -1
+                if sum(matrix[errors[0]]) > sum(matrix[errors[1]]):
+                    firstIdx = errors[0]
+                    secondIdx = errors[1]
+                else:
+                    firstIdx = errors[1]
+                    secondIdx = errors[0]
+                #print("firstIdx = " + str(firstIdx) + " secondIdx = " + str(secondIdx))
+                for j in range(len(matrix)):
+                    if matrix[firstIdx][j] == 1 and matrix[j][secondIdx] == 0:
+                        matrix[firstIdx][j] = 0
+                        matrix[j][firstIdx] = 0
+                        matrix[j][secondIdx] = 1
+                        matrix[secondIdx][j] = 1
+                        break;
+                errors = check_matrix_correctness(matrix, copy)
+        else: # Dla większości macierzy
+            # Algorytm naprawia pojedyńczo każdy wierzchołek
             for elem in errors:
+                # Ustawiamy flagę oznaczającą modyfikację wierzchołka
                 changed = False
-                for j in range(len(matrix)): 
-                    if j != elem and matrix[elem][j] == 0: #wyznaczanie nowej krawędzi, brane jest jakiekolwiek 0 spoza przekątnej
-                         for k in range(len(matrix[j])): #szukanie krawędzi, czyli matrix[j][k] == matrix[k][j] == 1
-                            if k != elem and matrix[j][k] == 1: #jeżeli algorytm znajdzie taką krawędź, to usuwamy ją ze względu na zachowanie stopnia wierzchołków j i k
-                                #print("j = " + str(j) + " k = " + str(k) + " elem = " + str(elem))
-                                # Usunięcie starej krawędzi i utworzenie dwóch nowych krawędzi
-                                matrix[j][k] = 0
-                                matrix[k][j] = 0
-                                matrix[elem][j] = 1
-                                matrix[j][elem] = 1
-                                matrix[k][elem] = 1
-                                matrix[elem][k] = 1
-                                # Informacja, że dla danego wierzchołka zaszła zmiana
-                                changed = True
-                            # Jedna zmiana wystarczy, trzeba sprawdzić rezultaty
-                            if changed:
-                                break
-                    # Jedna zmiana wystarczy, trzeba sprawdzić rezultaty
-                    if changed:
+                # Losowanie indeksów
+                # Losowanie występuje z tego powodu, że w niektórych przypadkach
+                # iteracyjne przechodzenie for'em po wierzchołkach powodowało zapętlenie
+                # tzn nie zgadzały się na zmianę wierzchołki 1 i 2
+                firstIdx = random.randint(0, len(matrix)-1)
+                secondIdx = random.randint(0, len(matrix)-1)
+                # Iter jest pewnego rodzaju 'bezpiecznikiem'. Jeżeli nie można znaleźć odpowiednich
+                # wierzchołków do zamiany to opuszczamy funkcje
+                iter = 0
+                while firstIdx in errors or secondIdx in errors or firstIdx == secondIdx or sum(matrix[firstIdx]) != sum(matrix[secondIdx]) or matrix[firstIdx][secondIdx] != 1:
+                    iter = iter + 1
+                    firstIdx = random.randint(0, len(matrix)-1)
+                    secondIdx = random.randint(0, len(matrix)-1)
+                    if iter == 1000:
                         break
-            # Ponowne sprawdzenie czy po zmianie wszystkie wierzchołki mają właściwe ilości krawędzi wychodzących
-            errors = check_matrix_correctness(matrix, copy)
-        return matrix
-    else:
-        return -1
-	
+                if iter == 1000:
+                    print("Couldn't repair matrix!")
+                    break
+                #print("firstIdx = " + str(firstIdx) + " secondIdx = " + str(secondIdx)) 
+                # Sprawdzenie czy na pewno nie ma krawędzi łączącej wylosowane wierzchołki z błędnym
+                if matrix[errors[0]][firstIdx] == 0 and matrix[errors[0]][secondIdx] == 0:
+                    # Zamiana odbywa się w taki sposób, żeby zachować stopnie wylosowanych wierzchołków
+                    # W związku z tym stopień 'błędnego' wierzchołka zwiększa się o 2 
+                    matrix[firstIdx][secondIdx] = 0
+                    matrix[secondIdx][firstIdx] = 0
+                    matrix[firstIdx][errors[0]] = 1
+                    matrix[errors[0]][firstIdx] = 1
+                    matrix[secondIdx][errors[0]] = 1
+                    matrix[errors[0]][secondIdx] = 1
+                # Aktualizacja listy błędów
+                errors = check_matrix_correctness(matrix, copy)
+            if iter == 1000:
+                # Formalnie można to zakomentować, ale wg mnie warto zobaczyć strukturę macierzy której nie można zmienić
+                print(matrix)
+                break
+                #print(errors)
+
 # Funckja tworzy graf zbudowany na podstawie zadanego ciągu graficznego
 # Przyjmuje ciąg graficzny
-# Zwraca utworzony graf lub -1 jeżeli grafu nie da się utworzyć na podstawie zadanego ciągu
+# Zwraca utworzony graf lub -1 jeżeli grafu nie da się utworzyć na podstawie zadanego ciągu        
 def create_graph_from_seq(arr):
     # Kopia tablicy przechowującej stopnie wierzchołków
     copy = arr.copy();
-    # Zmienna pomocnicza do określenia, czy ciąg graficzny nie jest grafem k-regularnym
-    isSame = True
-    # Sprawdzenie czy graf jest k-regularny
-    for i in range(len(arr)):
-        if arr[i] != arr[0]:
-            isSame = False
-    # Jeżeli graf jest k-regularny wywoływana jest funkcja dedykowana grafom k-regularnym
-    if isSame:
-        matrix = generate_k_regular_graph(arr[0], len(arr))
-        return matrix
     # Słownik potrzebny do przechowywania informacji o wierzchołkach izolowanych
     zeros = {}
     zeros[0] = []
+    # 0 na liście oznacza że występuje wierzchołek izolowanych
+    # Zdarzają się przypadki, gdzie wystąpienie tego wierzchołka w środku listy wywalało program np. [3, 2, 0, 2, 3]
+    # W związku z tym następuje sortowanie tablicy, żeby wierzchołek izolowany znalazł się na końcu i nie przeszkadzał
+    if 0 in arr:
+        arr = bubble_sort(arr)
     # Uzupełnienie słownika o wierzchołki izolowane
     for i in range(len(arr)):
         if arr[i] == 0:
@@ -216,12 +208,26 @@ def create_graph_from_seq(arr):
                             matrix[step][i] = 1
                             matrix[i][step] = 1
                             # Inkrementacja obecnie odwiedzanego stopnia wierzchołka
-                            counter = counter + 1        
-            # Przejście do kolejnego wierzchołka w ciągu graficznym
+                            counter = counter + 1
+            # Przejście do kolejnego wierzchołka w ciągu graficznym                
             idx = idx + 1
+        # Naprawa macierzy w przypadku występowania błędnych stopni wierzchołków
+        repair_matrix(matrix, copy)
         return matrix
     else:
-        return -1
+        return -1	
+
+# Funkcja tworząca graf k-regularny
+# Przyjmuje k - stopień pojedyńczego wierzchołka, numOfVertices - liczbę wierzchołków
+# Zwraca macierz lub -1 jeśli nie można utworzyć macierzy
+ def generate_k_regular_graph(k, numOfVertices):
+    # Inicjalizacja pustej tablicy do przechowywania stopni wierzchołków
+    arr = []
+    # Przypisanie do tablicy odpowiednich stopni wierzchołków
+    for i in range(numOfVertices):
+        arr.append(k)
+    # Zwraca funkcję tworzącą graf dla zadanego ciągu graficznego
+    return create_graph_from_seq(arr)
 		
 # Funkcja randomizująca graf
 # Przyjmuje graph - graf zadany macierzą sąsiedztwa, number - ilość randomizacji
