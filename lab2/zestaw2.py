@@ -405,3 +405,63 @@ def generate_euler_graph(numberOfVertices):
             path = path + " - " + str(cycle[i])
     # Wypisanie ścieżki Eulera
     print(path)
+    
+# Zmodyfikowany algorytm przechodzenia grafu w głąb
+# Pozwala znaleźć ścieżkę Hamiltona w grafie jeżeli taka istnieje
+# Jako parametry przyjmuje numer odwiedzanego wierzchołka, listę sąsiedztwa, 
+# tablice z informacją o odwiedzonych wierzchołkach, 
+# stos przechowujący numery odwiedzonych wierzchołków
+def modified_components_r(v, graph, comp, stack):
+    for i in graph.get(v):
+        # Sprawdzenie czy wierzchołek nie był odwiedzony
+        if comp[i-1] == -1:
+            # Oznaczenie wierzchołka jako odwiedzonego
+            comp[i-1] = 1
+            # Dodanie wierzchołka na stos
+            stack.append(i)
+            # Jeżeli długość stosu jest równa ilości wierzchołków w grafie
+            if len(stack) == len(graph):
+                # Sprawdzenie czy istnieje krawędź z pierwszego wierzchołka na stosie do ostatniego
+                if not stack[0] in graph.get(i):
+                    # Jeżeli nie to następuje usunięcie ostatniego wierzchołka ze stosu
+                    tmp = stack.pop()
+                    comp[tmp-1] = -1
+                else:
+                    # Jeżeli taka krawędź istnieje to następuje ponowne dodanie pierwszego wierzchołka ze stosu
+                    stack.append(stack[0])
+            else:
+                # Jeżeli stos jest mniejszy niż ilość wierzchołków w grafie to następuje rekurencyjne wywołanie procedury
+                modified_components_r(i, graph, comp, stack)
+                # Ścieżka hamiltona w grafie ma o 1 wierzchołek więcej od wierzchołków grafu
+                # Bez tego warunku nawet przy poprawnie znalezionej ścieżce algorytm nie zatrzymywałby się i zwracał nieprawidłowy wynik
+                if len(stack) <= len(graph): 
+                    tmp = stack.pop()
+                    comp[tmp-1] = -1
+                    
+# Funkcja wypisująca ścieżkę Hamiltona występującą w grafie
+# Jako argument przyjmuje graf w formie listy sąsiedztwa
+def find_hamilton_cycle(graph):
+    # Oznaczenie wszystkich wierzchołków jako nieodwiedzone
+    comp = [-1 for i in range(len(graph))]
+    # Inicjalizacja pustego stosu służącego do przechowywania numerów wierzchołków
+    stack = []
+    # Rozpoczęcie algorytmu od pierwszego wierzchołka
+    for i in range(len(graph)):
+        if comp[i] == -1:
+            comp[i] = 1
+            stack.append(i+1)
+            modified_components_r(1, graph, comp, stack)
+    # Jeżeli stos zawiera o jeden wierzchołek więcej od grafu to jest ścieżką Hamiltona
+    if len(stack) == len(graph)+1:
+        # Inicjalizacja stringa przechowującego informację
+        tmpStr = "["
+        # Dodawanie wierzchołków do stringa zgodnie z formatem
+        for i in range(len(stack)):
+            if i < len(stack)-1:
+                tmpStr = tmpStr + str(stack[i]) + " - "
+            else:
+                tmpStr = tmpStr + str(stack[i]) + "]"
+        # Wypisanie napisu
+        print(tmpStr)
+    else: # W przeciwnym wypadku wypisanie informacji że taka ścieżka nie istnieje
+        print("No hamilton cycle in this graph!")
