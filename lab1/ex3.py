@@ -1,10 +1,17 @@
 from random import randrange
 from random import random
-import ex1
 
-#function chooses random vertexes and if they're not connected it links them
-#while l is bigger than 0
 def rand_graph_A(n,l):
+    """
+    Functions draw the graph. It draws l edges between vertexes.
+    Function chooses random vertexes and if they're not connected it links them.
+    :param n: number of vertexes
+    :param l: number of edges
+    :return: array of arrays represents matrix of neighbourhood of graph
+    """
+    if l > (n * (n - 1)/2):
+        print("Cannot draw this graph, too many edges")
+        return None
     matrix = [[0 for i in range(n)] for j in range(n)]
     while(l > 0):
         i = randrange(0, n)
@@ -21,6 +28,12 @@ def rand_graph_A(n,l):
 #probability is between 0 and 1
 #function goes through half of matrix and decide if between two vertex is edge or not
 def rand_graph_B(n,p):
+    """
+    Functions draw the graph using probability that between two vertexes exists edge
+    :param n: number of vertexes
+    :param p: probability -> it is between [0,1]
+    :return: array of arrays represents matrix of neighbourhood of graph
+    """
     matrix = [[0 for i in range(n)] for j in range(n)]
     for i in range(n):
         for j in range(i+1,n):

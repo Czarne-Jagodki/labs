@@ -1,4 +1,9 @@
 def print_matrix(matrix):
+    """
+        Function shows a matrix of neighbourhood of graph.
+        :param list: it's a not empty array of arrays
+        :return: None
+        """
     i = 0
     for row in matrix:
         i = i + 1
@@ -6,6 +11,13 @@ def print_matrix(matrix):
         print(row)
 
 def print_list(list):
+    """
+    Function shows a list of neighbourhood of graph.
+    It show appropriate vertex and other vertexes connected with it
+    :param list: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    :return: None
+    """
     for key, value in list.items():
         print(key, end=' -> ')
         print(value)
@@ -19,6 +31,12 @@ neighbour_list = {
 }
 
 def from_list_to_matrix_neighbour(list):
+    """
+    Function converts neighbourhood list to neighbourhood matrix
+    :param list: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    :return:  array of arrays which represents graph
+    """
     matrix = []
     length = len(list)
     for elements in list.values():
@@ -35,6 +53,12 @@ def from_list_to_matrix_neighbour(list):
 #from_list_to_matrix_neighbour(neighbour_list)
 
 def from_matrix_neighbour_to_list(matrix):
+    """
+    Function converts neighbourhood matrix to neighbourhood list
+    :param matrix: not empty array of arrays which represents graph
+    :return: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    """
     list = {}
 
     i = 0
@@ -50,7 +74,31 @@ def from_matrix_neighbour_to_list(matrix):
 
 #from_matrix_neighbour_to_list(from_list_to_matrix_neighbour(neighbour_list))
 
+def transpone_matrix(matrix):
+    """
+    Function to transpone matrix
+    It's needed, beceuse functions associated with incidence returned not appropriate results
+    :param matrix: not empty array of arrays
+    :return:  array of arrays but transponed
+    """
+
+    import numpy as np
+    n = np.matrix(matrix)
+    n = n.transpose()
+    length = len(n)
+    new_matrix = []
+    n = np.array(n)
+    for row in n:
+        new_matrix.append(row)
+    return new_matrix
+
 def from_list_to_incidence_matrix(list):
+    """
+    Function converts list of neighbourhood to incidence matrix
+    :param list: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    :return: it's a array of arrays which represents incidence matrix of graph
+    """
     matrix = []
 
     for key, value in list.items():
@@ -63,12 +111,23 @@ def from_list_to_incidence_matrix(list):
                 row[elem - 1] = 1
                 matrix.append(row)
 
-    print_matrix(matrix)
+    #print_matrix(matrix)
+    matrix = transpone_matrix(matrix)
     return matrix
 
-#from_list_to_incidence_matrix(neighbour_list)
+print_matrix(from_list_to_incidence_matrix(neighbour_list))
 
 def from_incidence_matrix_to_list(matrix):
+    """
+    Function converts incidence matrix to list of neighbourhood
+    :param matrix: it's a not empty array of arrays represents incidence matrix of graph,
+                    the matrix must be transponed on the input
+                    if it does not become from functions from this module
+                    The best way to do it is by our previous function
+    :return: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    """
+    matrix = transpone_matrix(matrix)
     list = {}
     for row in matrix:
         i = -1
@@ -93,7 +152,8 @@ def from_incidence_matrix_to_list(matrix):
     for key in sorted(list):
         l[key] = list[key]
     list = l
-    #print_list(list)
     return list
 
-#from_incidence_matrix_to_list(from_list_to_incidence_matrix(neighbour_list))
+print_list(from_incidence_matrix_to_list(from_list_to_incidence_matrix(neighbour_list)))
+
+
