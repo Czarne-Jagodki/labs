@@ -37,7 +37,7 @@ def create_graph_visualization(matrix):
     nodes = calculate_nodes_position(len(matrix))
     plt.figure(figsize=(5, 5))
     graph_visualization = nx.from_numpy_matrix(matrix)
-    nx.draw_networkx(graph_visualization, nodes)
+    nx.draw_networkx(graph_visualization, nodes, node_color="#FFE55E", font_size=15)
     plt.show()
 
 #create_graph_visualization(array)
