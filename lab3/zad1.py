@@ -2,8 +2,8 @@ from itertools import combinations
 from random import sample, randint
 import matplotlib.pyplot as plt
 import networkx as nx
-from labs.structures.Graph import Graph
-from labs.structures.Vertex import Vertex
+from Graph import Graph
+from Vertex import Vertex
 
 
 def create_rand_consistent_weighted_graph(n: int = 5, weight_min: int = 1, weight_max: int = 10) -> Graph:
@@ -103,6 +103,7 @@ def draw(graph: Graph, filename: str = None):
     plt.clf()
 
 
-# zadanie 1
-graph = create_rand_consistent_weighted_graph(5, 1, 10)
-draw(graph, 'spojny_losowy_graf_wazony.png')
+if __name__ == '__main__':
+    # zadanie 1
+    graph = create_rand_consistent_weighted_graph(5, 1, 10)
+    draw(graph, 'spojny_losowy_graf_wazony.png')
