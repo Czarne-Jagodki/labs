@@ -2,8 +2,8 @@ from itertools import combinations
 from random import sample, randint
 import matplotlib.pyplot as plt
 import networkx as nx
-from labs.structures.Graph import Graph
-from labs.structures.Vertex import Vertex
+from Github.structures.Graph import Graph
+from Github.structures.Vertex import Vertex
 
 
 def create_rand_consistent_weighted_graph(n: int = 5, weight_min: int = 1, weight_max: int = 10) -> Graph:
@@ -79,8 +79,7 @@ def draw(graph: Graph, filename: str = None):
     # ustawienie numerow wierzcholkow
     labels = {}
     for i in range(len(graph.get_vertices())):
-        labels[i] = i + 1
-
+        labels[i] = i
     # pozycjonowanie na okregu
     pos = nx.circular_layout(nx_graph)
 
@@ -91,18 +90,21 @@ def draw(graph: Graph, filename: str = None):
     if graph.is_weighted():
         nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=nx.get_edge_attributes(nx_graph, "weight"))
 
-    # dla symetrycznosci
-    plt.axis("equal")
+    plt.axis("equal")  # symetrycznosc
 
     # ewentualny zapis do pliku
     if filename is not None:
-        plt.savefig(filename, format="png", bbox_inches='tight')
+        plt.savefig(filename, format="png")
     plt.show()
 
     # wyczyszczenie figury
     plt.clf()
 
 
-# zadanie 1
-graph = create_rand_consistent_weighted_graph(5, 1, 10)
-draw(graph, 'spojny_losowy_graf_wazony.png')
+def main():
+    graph = create_rand_consistent_weighted_graph(5, 1, 10)
+    draw(graph)
+
+
+if __name__ == "__main__":
+    main()

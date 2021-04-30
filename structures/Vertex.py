@@ -14,6 +14,14 @@ class Vertex:
         self.id = given_id
         self.visited = visited
 
+    def __hash__(self) -> int:
+        """
+        <! Wymagane bo inaczej blad unhashable type !>
+        Hashuje id wierzcholka
+        :return: zwraca zhashowany numer (id) wierzcholka
+        """
+        return hash(self.id)
+
     def get_id(self) -> int:
         """
         Zwraca id wierzcholka (numer)

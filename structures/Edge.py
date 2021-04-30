@@ -1,4 +1,4 @@
-from labs.structures.Vertex import Vertex
+from .Vertex import Vertex
 
 
 class Edge:

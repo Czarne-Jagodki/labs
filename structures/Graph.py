@@ -1,6 +1,6 @@
 from typing import List, Set
-from labs.structures.Edge import Edge
-from labs.structures.Vertex import Vertex
+from .Edge import Edge
+from .Vertex import Vertex
 
 
 class Graph:
@@ -34,29 +34,26 @@ class Graph:
         self.vertices.add(vertex)
 
     def add_edges(self, edges: Set[tuple]):
-            """
-            Dodaje krawedzie
-            :param edges: zbior tupli wierzcholkow lub wierzcholkow i wagi
-            """
-            for edge in edges:
-                # self.vertices.add(edge[0])
-                # self.vertices.add(edge[1])
-
-                # tutaj dodajemy krawedzie do grafu
-                has_edge = None
-                for x in self.edges:
-                    # jesli krawedz juz zostala dodana do grafu to wychodzimy z wewnetrznej petli i
-                    # sprawdzamy kolejna krawedz ze zbioru krawedzi ktore chcemy dodac
-                    if (x.get_vertices_ids()[0] == edge[1] and x.get_vertices_ids()[1] == edge[0]) or (
-                            x.get_vertices_ids()[0] == edge[0] and x.get_vertices_ids()[1] == edge[1]):
-                        has_edge = x
-                        break
-                # jesli nie to dodajemy brakujaca krawedz
-                if has_edge is None:
-                    if self.weighted:
-                        self.edges.append(Edge(edge[0], edge[1], edge[2]))
-                    else:
-                        self.edges.append(Edge(edge[0], edge[1]))
+        """
+        Dodaje krawedzie
+        :param edges: zbior tupli wierzcholkow lub wierzcholkow i wagi
+        """
+        for edge in edges:
+            # tutaj dodajemy krawedzie do grafu
+            has_edge = None
+            for x in self.edges:
+                # jesli krawedz juz zostala dodana do grafu to wychodzimy z wewnetrznej petli i
+                # sprawdzamy kolejna krawedz ze zbioru krawedzi ktore chcemy dodac
+                if (x.get_vertices_ids()[0] == edge[1] and x.get_vertices_ids()[1] == edge[0]) or (
+                        x.get_vertices_ids()[0] == edge[0] and x.get_vertices_ids()[1] == edge[1]):
+                    has_edge = x
+                    break
+            # jesli nie to dodajemy brakujaca krawedz
+            if has_edge is None:
+                if self.weighted:
+                    self.edges.append(Edge(edge[0], edge[1], edge[2]))
+                else:
+                    self.edges.append(Edge(edge[0], edge[1]))
 
     def get_edges(self) -> List[Edge]:
         """
@@ -101,3 +98,36 @@ class Graph:
         :return: prawda/falsz
         """
         return self.weighted
+
+    def find_neighbours(self, vertex_id) -> List[int]:
+        """
+        Znajduje sasiadow danego wierzcholka w zadanym grafie
+        :param vertex_id: id wierzcholka, dla ktorego znajdujemy sasiadow
+        :param graph: zadany graf
+        :return: lista sasiadow
+        """
+        neighbours = []
+        edges = self.get_edges()
+        for edge in edges:
+            tuple_of_vertices = edge.get_vertices_ids()
+            # jezeli wierzcholek obecny w krawedzi, drugi wierzcholek jest jego sasiadem
+            if tuple_of_vertices[0].get_id() == vertex_id:
+                neighbours.append(tuple_of_vertices[1].get_id())
+                continue
+            # analogicznie
+            if tuple_of_vertices[1].get_id() == vertex_id:
+                neighbours.append(tuple_of_vertices[0].get_id())
+                continue
+        return neighbours
+
+    def find_edge(self, first_vertex: int, second_vertex: int) -> Edge:
+        """
+        Znajduje i zwraca krawedz dwoch wierzcholkow
+        """
+        for edge in self.get_edges():
+            vertices = edge.get_vertices_ids()
+            vertex_1 = vertices[0].get_id()
+            vertex_2 = vertices[1].get_id()
+            if (vertex_1 == first_vertex and vertex_2 == second_vertex) or (
+                    vertex_1 == second_vertex and vertex_2 == first_vertex):
+                return edge
