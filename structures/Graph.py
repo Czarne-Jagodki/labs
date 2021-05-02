@@ -82,15 +82,48 @@ class Graph:
             vertex_level[edge_vertices[1].get_id()] += 1
         return vertex_level
 
+    def dfs(self, temp: List[int], v: int, visited: List[bool]) -> List[int]:
+        """
+        Algorytm przeszukiwania w glab
+        :return: lista wierzcholkow tworzacych spojna skladowa
+        """
+        # ustaw obecny wierzcholek na odwiedzony
+        visited[v] = True
+
+        # dodaj wierzcholek do listy
+        temp.append(v)
+
+        # znajdujemy sasiadow wierzcholka v
+        list_of_neigbours = self.find_neighbours(v)
+
+        # powtorz dla kazdego wierzcholka bedacego sasiadem v ktorego juz nie odwiedzilismy
+        for i in list_of_neigbours:
+            if not visited[i]:
+                # zaktualizuj liste
+                temp = self.dfs(temp, i, visited)
+        return temp
+
+    def connected_components(self) -> List[List[int]]:
+        """
+        Zwraca liste spojnych skladowych
+        """
+        visited = [False] * len(self.get_vertices())
+        components = []
+        # for i in range(len(self.get_vertices())):
+        #     visited.append(False)
+        for v in range(len(self.get_vertices())):
+            if not visited[v]:
+                temp = []
+                components.append(self.dfs(temp, v, visited))
+        return components
+
     def is_consistent(self) -> bool:
         """
         Sprawdza czy graf jest spojny
         :return: prawda/falsz
         """
-        vertices_lvls = self.get_vertices_lvls()
-        nr_of_zero_lvls = len(list(filter(lambda lvl: lvl == 0, vertices_lvls)))
-        # jesli istnieje wierzcholek ktorego stopien == 0, to graf na pewno nie jest spojny
-        return nr_of_zero_lvls == 0
+        # jezeli graf ma jedna spojna skladowa -> jest spojny
+        return len(self.connected_components()) == 1
 
     def is_weighted(self) -> bool:
         """

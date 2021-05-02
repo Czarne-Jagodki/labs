@@ -24,7 +24,7 @@ def create_rand_consistent_weighted_graph(n: int = 5, weight_min: int = 1, weigh
 
     # losujemy liczbe krawedzi z przedzialu <min, max> (wlacznie)
     nr_of_edges = randint(min_edges, max_edges)
-
+    counter = 1
     while True:
         # stworzenie wszystkich mozliwych 2-elementowych kombinacji wierzcholkow w postaci tupli
         vertex_comb = combinations(vertices, 2)

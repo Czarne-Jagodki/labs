@@ -69,7 +69,7 @@ def get_trail_to_vertex(predecessors: Dict[int, int], vertex: int) -> List[int]:
 
 
 def main():
-    g = create_rand_consistent_weighted_graph(12, 1, 10)
+    g = create_rand_consistent_weighted_graph(10, 1, 10)
     draw(g, "spojny_losowy_graf_wazony.png")
 
     print("\nZestaw 3, zadanie 2 - Dijkstra:")
