@@ -1,6 +1,6 @@
 import math
 from typing import Dict, Tuple, List
-from Github.lab3.zad1 import create_rand_consistent_weighted_graph, draw
+from Github.lab3.zad1 import graph
 from Github.structures import Graph
 
 
@@ -44,8 +44,8 @@ def dijkstra(graph: Graph, start_vertex: int) -> Tuple[Dict[int, int], Dict[int,
                     distances[v] = distances[u] + edge_weight
                     predecessors[v] = u
 
-    print("Odległości:\n" + str(distances))
-    print("Poprzednicy:\n" + str(predecessors))
+    # print("Odległości:\n" + str(distances))
+    # print("Poprzednicy:\n" + str(predecessors))
     return distances, predecessors
 
 
@@ -68,11 +68,10 @@ def get_trail_to_vertex(predecessors: Dict[int, int], vertex: int) -> List[int]:
     return get_trail_to_vertex(predecessors, predecessors[vertex]) + [vertex]
 
 
+# zadanie 2
 def main():
-    g = create_rand_consistent_weighted_graph(10, 1, 10)
-    draw(g, "spojny_losowy_graf_wazony.png")
-
     print("\nZestaw 3, zadanie 2 - Dijkstra:")
+    g = graph
     start_vertex = 3
     distances, predecessors = dijkstra(g, start_vertex)
     trails = get_trails(predecessors)
