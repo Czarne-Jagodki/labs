@@ -24,7 +24,7 @@ def create_rand_consistent_weighted_graph(n: int = 5, weight_min: int = 1, weigh
 
     # losujemy liczbe krawedzi z przedzialu <min, max> (wlacznie)
     nr_of_edges = randint(min_edges, max_edges)
-
+    counter = 1
     while True:
         # stworzenie wszystkich mozliwych 2-elementowych kombinacji wierzcholkow w postaci tupli
         vertex_comb = combinations(vertices, 2)
@@ -79,8 +79,7 @@ def draw(graph: Graph, filename: str = None):
     # ustawienie numerow wierzcholkow
     labels = {}
     for i in range(len(graph.get_vertices())):
-        labels[i] = i + 1
-
+        labels[i] = i
     # pozycjonowanie na okregu
     pos = nx.circular_layout(nx_graph)
 
@@ -91,19 +90,18 @@ def draw(graph: Graph, filename: str = None):
     if graph.is_weighted():
         nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=nx.get_edge_attributes(nx_graph, "weight"))
 
-    # dla symetrycznosci
-    plt.axis("equal")
+    plt.axis("equal")  # symetrycznosc
 
     # ewentualny zapis do pliku
     if filename is not None:
-        plt.savefig(filename, format="png", bbox_inches='tight')
+        plt.savefig(filename, format="png")
     plt.show()
 
     # wyczyszczenie figury
     plt.clf()
 
 
-if __name__ == '__main__':
-    # zadanie 1
-    graph = create_rand_consistent_weighted_graph(5, 1, 10)
-    draw(graph, 'spojny_losowy_graf_wazony.png')
+# zadanie 1
+print("\nZestaw 3, zadanie 1 - spójny losowy graf ważony:")
+graph = create_rand_consistent_weighted_graph(5, 1, 10)
+draw(graph)
