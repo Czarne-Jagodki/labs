@@ -15,6 +15,8 @@ def create_rand_consistent_weighted_graph(n: int = 5, weight_min: int = 1, weigh
     :param weight_max: waga max
     :return: gotowy graf
     """
+    
+    print('Jestem wywolywana')
 
     vertices = set([v for v in range(n)])  # zbior numerow wierzcholkow
     edges = set()  # zbior krawedzi (tupli o 3 polach) zlozonych z 2 wierczholkow i losowej wagi
@@ -102,7 +104,7 @@ def draw(graph: Graph, filename: str = None):
 
 
 # zadanie 1
-if __name__ == '__main__':
-    print("\nZestaw 3, zadanie 1 - spójny losowy graf ważony:")
-    graph = create_rand_consistent_weighted_graph(6, 1, 10)
-    draw(graph)
+# if __name__ == '__main__':
+print("\nZestaw 3, zadanie 1 - spójny losowy graf ważony:")
+graph = create_rand_consistent_weighted_graph(6, 1, 10)
+draw(graph)
