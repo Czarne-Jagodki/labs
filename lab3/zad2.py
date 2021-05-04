@@ -1,7 +1,7 @@
 import math
 from typing import Dict, Tuple, List
-from Github.lab3.zad1 import graph
 from Github.structures import Graph
+from Github.structures.Graph import load_from_file
 
 
 def dijkstra(graph: Graph, start_vertex: int) -> Tuple[Dict[int, int], Dict[int, int]]:
@@ -71,8 +71,8 @@ def get_trail_to_vertex(predecessors: Dict[int, int], vertex: int) -> List[int]:
 # zadanie 2
 def main():
     print("\nZestaw 3, zadanie 2 - Dijkstra:")
-    g = graph
-    start_vertex = 3
+    g = load_from_file('graph.txt')
+    start_vertex = 5
     distances, predecessors = dijkstra(g, start_vertex)
     trails = get_trails(predecessors)
     print('START: s = ' + str(start_vertex))

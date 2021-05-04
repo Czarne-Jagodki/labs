@@ -1,7 +1,6 @@
 from typing import List
-from Github.lab3.zad1 import graph
 from Github.lab3.zad2 import dijkstra
-from Github.structures.Graph import Graph
+from Github.structures.Graph import Graph, load_from_file
 
 
 def create_distances_matrix(g: Graph) -> List[List[int]]:
@@ -22,7 +21,8 @@ def create_distances_matrix(g: Graph) -> List[List[int]]:
 
 def main():
     print("\nZestaw 3, zadanie 3 - macierz odległości:")
-    distances_matrix = create_distances_matrix(graph)
+    g = load_from_file('graph.txt')
+    distances_matrix = create_distances_matrix(g)
     for row in distances_matrix:
         print(*row, sep='\t')
 

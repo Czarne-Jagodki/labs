@@ -24,7 +24,7 @@ def create_rand_consistent_weighted_graph(n: int = 5, weight_min: int = 1, weigh
 
     # losujemy liczbe krawedzi z przedzialu <min, max> (wlacznie)
     nr_of_edges = randint(min_edges, max_edges)
-    counter = 1
+
     while True:
         # stworzenie wszystkich mozliwych 2-elementowych kombinacji wierzcholkow w postaci tupli
         vertex_comb = combinations(vertices, 2)
@@ -66,10 +66,8 @@ def draw(graph: Graph, filename: str = None):
     for vertex in graph.get_vertices():
         nx_graph.add_node(vertex.get_id())
 
-    edges = graph.get_edges()
-
     # dodanie krawedzi do grafu
-    for edge in edges:
+    for edge in graph.get_edges():
         vertices_ids = edge.get_vertices_ids()
         if graph.is_weighted():
             nx_graph.add_edge(vertices_ids[0].get_id(), vertices_ids[1].get_id(), weight=edge.get_weight())
@@ -88,7 +86,8 @@ def draw(graph: Graph, filename: str = None):
 
     # dodanie wag krawedzi do rysunku
     if graph.is_weighted():
-        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=nx.get_edge_attributes(nx_graph, "weight"))
+        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=nx.get_edge_attributes(nx_graph, "weight"),
+                                     label_pos=0.5)
 
     plt.axis("equal")  # symetrycznosc
 
@@ -97,14 +96,12 @@ def draw(graph: Graph, filename: str = None):
         plt.savefig(filename, format="png")
     plt.show()
 
-    # wyczyszczenie figury
+    # wyczyszczenie
     plt.clf()
 
 
 # zadanie 1
 print("\nZestaw 3, zadanie 1 - spójny losowy graf ważony:")
 graph = create_rand_consistent_weighted_graph(7, 1, 10)
+graph.save_to_file('graph.txt')
 draw(graph)
-
-
-

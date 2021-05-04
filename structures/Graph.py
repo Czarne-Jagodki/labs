@@ -1,3 +1,4 @@
+import pickle
 from typing import List, Set
 from .Edge import Edge
 from .Vertex import Vertex
@@ -67,20 +68,20 @@ class Graph:
         """
         return self.vertices
 
-    def get_vertices_lvls(self) -> List[int]:
-        """
-        Zwraca liste stopni wierzcholkow
-        """
-        nr_of_vertices = len(self.get_vertices())
-        vertex_level = [0] * nr_of_vertices
-        edges = self.get_edges()
-        for edge in edges:
-            edge_vertices = edge.get_vertices_ids()
-            # zwiekszamy stopien danego wierzcholka o jeden dla kazdej krawedzi
-            # i zapisujemy inkrementowana wartosc stopnia wierzcholka pod danym id wierzcholka w tablicy
-            vertex_level[edge_vertices[0].get_id()] += 1
-            vertex_level[edge_vertices[1].get_id()] += 1
-        return vertex_level
+    # def get_vertices_lvls(self) -> List[int]:
+    #     """
+    #     Zwraca liste stopni wierzcholkow
+    #     """
+    #     nr_of_vertices = len(self.get_vertices())
+    #     vertex_level = [0] * nr_of_vertices
+    #     edges = self.get_edges()
+    #     for edge in edges:
+    #         edge_vertices = edge.get_vertices_ids()
+    #         # zwiekszamy stopien danego wierzcholka o jeden dla kazdej krawedzi
+    #         # i zapisujemy inkrementowana wartosc stopnia wierzcholka pod danym id wierzcholka w tablicy
+    #         vertex_level[edge_vertices[0].get_id()] += 1
+    #         vertex_level[edge_vertices[1].get_id()] += 1
+    #     return vertex_level
 
     def dfs(self, temp: List[int], v: int, visited: List[bool]) -> List[int]:
         """
@@ -96,7 +97,7 @@ class Graph:
         # znajdujemy sasiadow wierzcholka v
         list_of_neigbours = self.find_neighbours(v)
 
-        # powtorz dla kazdego wierzcholka bedacego sasiadem v ktorego juz nie odwiedzilismy
+        # powtorz dla kazdego wierzcholka bedacego sasiadem v ktorego jeszcze nie odwiedzilismy
         for i in list_of_neigbours:
             if not visited[i]:
                 # zaktualizuj liste
@@ -109,8 +110,6 @@ class Graph:
         """
         visited = [False] * len(self.get_vertices())
         components = []
-        # for i in range(len(self.get_vertices())):
-        #     visited.append(False)
         for v in range(len(self.get_vertices())):
             if not visited[v]:
                 temp = []
@@ -164,3 +163,13 @@ class Graph:
             if (vertex_1 == first_vertex and vertex_2 == second_vertex) or (
                     vertex_1 == second_vertex and vertex_2 == first_vertex):
                 return edge
+
+    def save_to_file(self, filename: str = 'graph.txt') -> None:
+        file = open(filename, 'wb')
+        pickle.dump(self, file)
+        file.close()
+
+
+def load_from_file(filename: str) -> Graph:
+    file = open(filename, 'rb')
+    return pickle.load(file)
