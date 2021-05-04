@@ -102,6 +102,7 @@ def draw(graph: Graph, filename: str = None):
 
 
 # zadanie 1
-print("\nZestaw 3, zadanie 1 - spójny losowy graf ważony:")
-graph = create_rand_consistent_weighted_graph(5, 1, 10)
-draw(graph)
+if name == '__main__':
+    print("\nZestaw 3, zadanie 1 - spójny losowy graf ważony:")
+    graph = create_rand_consistent_weighted_graph(6, 1, 10)
+    draw(graph)

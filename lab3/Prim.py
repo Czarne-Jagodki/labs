@@ -138,4 +138,4 @@ if __name__ == '__main__':
     
     result_graph = convert_to_drawable_graph(graphPrim, edgesPrim)
     
-    draw(result_graph)    
+    draw(result_graph, 'result.png')    
