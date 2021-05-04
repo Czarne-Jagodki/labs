@@ -16,7 +16,7 @@ class Graph:
         """
         Inicjalizacja grafu
         :param edges: krawedzie
-        :param vertices: wezly
+        :param vertices: wierzcholki
         :param weighted: czy krawedzie maja wagi
         """
         if edges is None:
@@ -29,8 +29,8 @@ class Graph:
 
     def add_vertex(self, vertex: Vertex):
         """
-        Dodaje nowy wezel
-        :param vertex: wezel
+        Dodaje nowy wierzcholek
+        :param vertex: wierzcholek
         """
         self.vertices.add(vertex)
 
@@ -67,21 +67,6 @@ class Graph:
         Zwraca zbior wezlow
         """
         return self.vertices
-
-    # def get_vertices_lvls(self) -> List[int]:
-    #     """
-    #     Zwraca liste stopni wierzcholkow
-    #     """
-    #     nr_of_vertices = len(self.get_vertices())
-    #     vertex_level = [0] * nr_of_vertices
-    #     edges = self.get_edges()
-    #     for edge in edges:
-    #         edge_vertices = edge.get_vertices_ids()
-    #         # zwiekszamy stopien danego wierzcholka o jeden dla kazdej krawedzi
-    #         # i zapisujemy inkrementowana wartosc stopnia wierzcholka pod danym id wierzcholka w tablicy
-    #         vertex_level[edge_vertices[0].get_id()] += 1
-    #         vertex_level[edge_vertices[1].get_id()] += 1
-    #     return vertex_level
 
     def dfs(self, temp: List[int], v: int, visited: List[bool]) -> List[int]:
         """

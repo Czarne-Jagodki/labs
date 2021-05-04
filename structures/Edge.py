@@ -17,5 +17,5 @@ class Edge:
     def get_vertices_ids(self) -> tuple:
         return self.vertices
 
-    def get_weight(self):
+    def get_weight(self) -> int:
         return self.weight

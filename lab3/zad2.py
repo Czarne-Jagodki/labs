@@ -39,6 +39,7 @@ def dijkstra(graph: Graph, start_vertex: int) -> Tuple[Dict[int, int], Dict[int,
         for v in graph.find_neighbours(u):
             if v in list_of_vertices:
                 edge_weight = graph.find_edge(u, v).get_weight()
+
                 # relaksacja krawedzi - poprawienie rozwiazania
                 if distances[v] > distances[u] + edge_weight:
                     distances[v] = distances[u] + edge_weight
@@ -61,7 +62,7 @@ def get_trails(predecessors: Dict[int, int]) -> Dict[int, List[int]]:
 
 def get_trail_to_vertex(predecessors: Dict[int, int], vertex: int) -> List[int]:
     """
-    Zwraca sciezke do danego wierzcholka
+    Zwraca liste wierzcholkow tworzacych sciezke do danego wierzcholka
     """
     if predecessors[vertex] is None:  # przejscie z tego samego wierzcholka do tego samego
         return [vertex]
