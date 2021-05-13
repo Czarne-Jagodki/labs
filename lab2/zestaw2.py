@@ -1,8 +1,53 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+import math
 import collections
 import random
+import time
 
-# Funkcja pomocnicza z zestawu 1
+def calculate_nodes_position(n_of_nodes):
+    """
+    Function calculates position of the nodes.
+    :param n_of_nodes: an integer which represents number of nodes
+    :return nodes: a dictionary which contains a number of node as a key a tuple with coordinates as a value.
+    """
+    
+    nodes = {}
+    for n in range(0, n_of_nodes):
+        x = math.cos(2 * math.pi / n_of_nodes * n)
+        y = math.sin(2 * math.pi / n_of_nodes * n)
+        nodes.update({n: (x, y)})
+    return nodes
+	
+def create_graph_visualization(matrix):
+    """
+    Function visualizes the matrix of neighbourhood of graph
+    :param matrix: it's a numpy matrix, so using our functions from previous module
+                    it is needed to be converted by numpy.matrix
+    :return: None
+    """
+    sizes = matrix.shape
+    if len(sizes) != 2 or sizes[0] != sizes[1]:
+        print("Incorrect matrix!")
+        return
+    if len(matrix) > 0:
+        nodes = calculate_nodes_position(len(matrix))
+        plt.figure(figsize=(5, 5))
+        graph_visualization = nx.from_numpy_matrix(matrix)
+        nx.draw_networkx(graph_visualization, nodes, node_color="#FFE55E", font_size=15)
+        plt.show()
+    else:
+        print("Empty matrix!")
+		
 def from_matrix_neighbour_to_list(matrix):
+    """
+    Function converts neighbourhood matrix to neighbourhood list
+    :param matrix: not empty array of arrays which represents graph
+    :return: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    """
+    
     list = {}
 
     i = 0
@@ -16,10 +61,32 @@ def from_matrix_neighbour_to_list(matrix):
         list[i] = row_list
     return list
 	
-# Proste sortowanie (może nie trzeba było tego pisać, ale nie znam się na tym języku)    
-# Na wejściu przyjmuje ciąg graficzny
-# Zwraca posortowany ciąg graficzny
+def from_list_to_matrix_neighbour(list):
+    """
+    Function converts neighbourhood list to neighbourhood matrix
+    :param list: it's a dictionary: keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+    :return:  array of arrays which represents graph
+    """
+    matrix = []
+    length = len(list)
+    for elements in list.values():
+        row = []
+        for i in range(1, length + 1):
+            if i in elements:
+                row.append(1)
+            else :
+                row.append(0)
+        matrix.append(row)
+    return matrix
+	
 def bubble_sort(arr):
+    """
+        Function uses bubble sort algorithm to sort a list.
+        :param arr: it's a not empty list 
+        :return arr: sorted list.
+    """
+    
     temp = 0
     for i in range(0, len(arr)-1):
         for j in range(0, len(arr)-i-1):
@@ -29,10 +96,13 @@ def bubble_sort(arr):
                 arr[j+1] = temp
     return arr
 	
-# Funkcja sprawdza czy w sekwencji jest nieparzysta liczba elementów nieparzystych
-# Na wejściu przyjmuje ciąg graficzny
-# Zwraca true jeżeli przekazany ciąg jest ciągiem graficznym, w przeciwnym wypadku false
 def calculate_odd_elements(arr):
+    """
+        Function calcuates the number of odd element in a list.
+        :param arr: it's a not empty list 
+        :return isDegreeSeq: boolean value - False when there is odd number of odd elements, True when there is even number of odd elements.
+    """
+    
     counter = 0;
     isDegreeSeq = True;
     for i in range(0, len(arr)):
@@ -42,50 +112,54 @@ def calculate_odd_elements(arr):
         isDegreeSeq = False
     return isDegreeSeq
 	
-# Algorytm sprawdzający czy sekwencja liczb jest ciągiem graficznym
-# Na wejściu przyjmuje ciąg graficzny
-# Zwraca true jeżeli przekazany ciąg jest ciągiem graficznym, w przeciwnym wypadku false
 def degree_seq(arr):
-    # Jeżeli ilość nieparzystych stopni jest nieparzysta to wiadomo że sekwencja nie jest ciągiem graficznym
+    """
+        Function check if the list represents a degree sequence or not.
+        :param arr: it's a non empty list 
+        :return boolean: boolean value - True if the list represents a degree sequence, otherwise False.
+    """
+    
     if calculate_odd_elements(arr):
-        # Sortowanie tablicy
         arr = bubble_sort(arr)
         while True:
-            # Jeżeli wszystkie elementy sekwencji zostały wyzerowane to jest to ciąg graficzny
             allZeros = all(elem == 0 for elem in arr)
             if allZeros == True:
                 return allZeros
-            # Sprawdzenie czy po aktualizacji sekwencji nie występuje w niej liczba ujemna
             isNegative = False
             for i in range(1, len(arr)):
                 if arr[i] < 0:
                     isNegative = True
-            # Jeżeli jedna z liczb w sekwencji jest ujemna lub wartość jednej z liczb jest większa od długości sekwencji zwracany jest false
             if arr[0] < 0 or arr[0] >= len(arr) or isNegative:
                 return False
-            # Aktualizacja sekwencji poprzez zmniejszenie odpowiednich liczb
             for i in range(1, arr[0]+1):
                 arr[i] = arr[i] - 1
             arr[0] = 0
-            # Posortowanie zaktualizowanej sekwencji
             arr = bubble_sort(arr)
     else:
         return False
 		
-# Wyznaczenie sumy tablicy jednowymiarowej macierzy
-# Funkcja jest używana to obliczania stopni wierzchołków dla macierzy sąsiedztwa
-# Przyjmuje rząd z macierzy sąsiedztwa
-# Zwraca sumę która jest stopniem wierzchołka
 def sum(arr):
+    
+    """
+        Function calculates a sum of the list elements.
+        :param arr: it's not empty list
+        :return sum: integer which represents a sum of list elements.
+    """
+    
     sum = 0
     for i in range(0, len(arr)):
         sum = sum + arr[i]
     return sum
 	
-# Sprawdzenie czy wierzchołki w macierzy sąsiedztwa mają stopnie zgodne z wymaganymi
-# Przyjmuje macierz sąsiedztwa oraz ciąg graficzny
-# Zwraca tablicę zawierającą indeksy wierzchołków o błędnych stopniach
 def check_matrix_correctness(matrix, degrees):
+    
+    """
+        Function check if the number of edges from each vertex is equal to a number represents degree of each vertex.
+        :param matrix: not empty array of arrays which represents graph
+        :param degrees: not empty array which represents vertices degrees of the graph
+        :return errorsArr: an array which contains an indexes of incorrect vertices.
+    """
+    
     errorsArr = []
     tmp = 0
     for i in range(len(matrix)):
@@ -93,240 +167,169 @@ def check_matrix_correctness(matrix, degrees):
         if tmp != degrees[i]:
             errorsArr.append(i)
     return errorsArr
-
-# Funkcja naprawiająca macierze, które mają nieprawidłowe stopnie wierzchołków
-# Przyjmuje jako argument macierz sąsiedztwa reprezentującą graf oraz ciąg graficzny
-# Funkcja działa tylko na przekazanej do niej macierzy - nic nie zwraca
-def repair_matrix(matrix, copy):
-    # Sprawdzenie czy są wierzchołki o błędnych stopniach
-    errors = check_matrix_correctness(matrix, copy)
-    while not len(errors) == 0:
-        # To jest specjalny przypadek dla macierzy o stopniach np. [2, 2, 2, 2, 2]
-        # W powyższym przypadku kod w else się zapętla (nie umiem tego wytłumaczyć)
-        if len(errors) % 2 == 0 and sum(matrix[errors[0]]) != sum(matrix[errors[1]]):
-                firstIdx = -1
-                secondIdx = -1
-                if sum(matrix[errors[0]]) > sum(matrix[errors[1]]):
-                    firstIdx = errors[0]
-                    secondIdx = errors[1]
-                else:
-                    firstIdx = errors[1]
-                    secondIdx = errors[0]
-                #print("firstIdx = " + str(firstIdx) + " secondIdx = " + str(secondIdx))
-                for j in range(len(matrix)):
-                    if matrix[firstIdx][j] == 1 and matrix[j][secondIdx] == 0:
-                        matrix[firstIdx][j] = 0
-                        matrix[j][firstIdx] = 0
-                        matrix[j][secondIdx] = 1
-                        matrix[secondIdx][j] = 1
-                        break;
-                errors = check_matrix_correctness(matrix, copy)
-        else: # Dla większości macierzy
-            # Algorytm naprawia pojedyńczo każdy wierzchołek
-            for elem in errors:
-                # Ustawiamy flagę oznaczającą modyfikację wierzchołka
-                changed = False
-                # Losowanie indeksów
-                # Losowanie występuje z tego powodu, że w niektórych przypadkach
-                # iteracyjne przechodzenie for'em po wierzchołkach powodowało zapętlenie
-                # tzn nie zgadzały się na zmianę wierzchołki 1 i 2
-                firstIdx = random.randint(0, len(matrix)-1)
-                secondIdx = random.randint(0, len(matrix)-1)
-                # Iter jest pewnego rodzaju 'bezpiecznikiem'. Jeżeli nie można znaleźć odpowiednich
-                # wierzchołków do zamiany to opuszczamy funkcje
-                iter = 0
-                while firstIdx in errors or secondIdx in errors or firstIdx == secondIdx or sum(matrix[firstIdx]) != sum(matrix[secondIdx]) or matrix[firstIdx][secondIdx] != 1:
-                    iter = iter + 1
-                    firstIdx = random.randint(0, len(matrix)-1)
-                    secondIdx = random.randint(0, len(matrix)-1)
-                    if iter == 1000:
-                        break
-                if iter == 1000:
-                    print("Couldn't repair matrix!")
-                    break
-                #print("firstIdx = " + str(firstIdx) + " secondIdx = " + str(secondIdx)) 
-                # Sprawdzenie czy na pewno nie ma krawędzi łączącej wylosowane wierzchołki z błędnym
-                if matrix[errors[0]][firstIdx] == 0 and matrix[errors[0]][secondIdx] == 0:
-                    # Zamiana odbywa się w taki sposób, żeby zachować stopnie wylosowanych wierzchołków
-                    # W związku z tym stopień 'błędnego' wierzchołka zwiększa się o 2 
-                    matrix[firstIdx][secondIdx] = 0
-                    matrix[secondIdx][firstIdx] = 0
-                    matrix[firstIdx][errors[0]] = 1
-                    matrix[errors[0]][firstIdx] = 1
-                    matrix[secondIdx][errors[0]] = 1
-                    matrix[errors[0]][secondIdx] = 1
-                # Aktualizacja listy błędów
-                errors = check_matrix_correctness(matrix, copy)
-            if iter == 1000:
-                # Formalnie można to zakomentować, ale wg mnie warto zobaczyć strukturę macierzy której nie można zmienić
-                print(matrix)
-                break
-                #print(errors)
-
-# Funckja tworzy graf zbudowany na podstawie zadanego ciągu graficznego
-# Przyjmuje ciąg graficzny
-# Zwraca utworzony graf lub -1 jeżeli grafu nie da się utworzyć na podstawie zadanego ciągu        
+	
+def sort_in_reverse_order(list):
+    
+    """
+        Function sorts an array of arrays in reverse order.
+        :param list: an unsorted array of arrays
+        :return : None. 
+    """
+    
+    for i in range(len(list)-1):
+        for j in range(i+1, len(list)):
+            if list[i][1] < list[j][1]:
+                tmp = list[i]
+                list[i] = list[j]
+                list[j] = tmp
+				
 def create_graph_from_seq(arr):
-    # Kopia tablicy przechowującej stopnie wierzchołków
-    copy = arr.copy();
-    # Słownik potrzebny do przechowywania informacji o wierzchołkach izolowanych
-    zeros = {}
-    zeros[0] = []
-    # 0 na liście oznacza że występuje wierzchołek izolowanych
-    # Zdarzają się przypadki, gdzie wystąpienie tego wierzchołka w środku listy wywalało program np. [3, 2, 0, 2, 3]
-    # W związku z tym następuje sortowanie tablicy, żeby wierzchołek izolowany znalazł się na końcu i nie przeszkadzał
-    if 0 in arr:
-        arr = bubble_sort(arr)
-    # Uzupełnienie słownika o wierzchołki izolowane
+    
+    """
+        Function creates a graph based on the degree sequence represented by an array arr.
+        :param arr: an array which represents a degree sequence
+        :param matrix or []: an array of arrays which represents a graph.
+    """
+    
+    arr = bubble_sort(arr)
+    matrix = [[0 for i in range(len(arr))] for j in range(len(arr))]
+    listOfIndexesAndDegrees = []
     for i in range(len(arr)):
-        if arr[i] == 0:
-            zeros[arr[i]].append(i)
-    # Inicjalizacja macierzy reprezentującej graf
-    matrix = [[0 for i in range(len(copy))] for j in range(len(copy))]
-    # Inicjalizacja licznika 
-    counter = 0
-    # Inicjalizacja kroku
-    step = 1
-    # Inicjalizacja iteratora przechodzącego po wartościach ciągu graficznego
-    idx = 0
-    # Sortowanie stopni wierzchołków
-    copy = bubble_sort(copy)
-    # Jeżeli ciąg jest ciągiem graficznym to tworzona jest macierz, w przeciwnym wypadku funkcja zwraca -1
+        listOfIndexesAndDegrees.append([i, arr[i]])
+           
     if degree_seq(arr):
-        # W każdym kroku przechodzi po kolejnym wierzchołku tworzonej macierzy
-        for step in range(0, len(copy)):
-            # Sprawdzenie ile krawędzi wychodzi z aktualnie odwiedzanego wierzchołka
-            counter = sum(matrix[step])
-            # Nowe krawędzie mogą być dodane tylko od obecnego wierzchołka do wierzchołków o "większych" wartościach
-            for i in range(step+1, len(copy)):
-                # Upewnienie się, że nie jest to wierzchołek izolowany
-                if not i in zeros[0] and not step in zeros[0]:
-                    # Sprawdzenie czy stopień wierzchołka na drugim końcu krawędzi nie zostanie przekroczony
-                    if sum(matrix[i]) < copy[i]:
-                        # Utworzenie krawędzi
-                        if counter < copy[idx]:
-                            matrix[step][i] = 1
-                            matrix[i][step] = 1
-                            # Inkrementacja obecnie odwiedzanego stopnia wierzchołka
-                            counter = counter + 1
-            # Przejście do kolejnego wierzchołka w ciągu graficznym                
-            idx = idx + 1
-        # Naprawa macierzy w przypadku występowania błędnych stopni wierzchołków
-        repair_matrix(matrix, copy)
-        return matrix
+        while True:
+            allZeros = True
+            for i in range(len(arr)):
+                if listOfIndexesAndDegrees[i][1] != 0:
+                    allZeros = False
+            if allZeros and check_matrix_correctness(matrix, arr):
+                return matrix
+            isNegative = False
+            for i in range(1, len(arr)):
+                if listOfIndexesAndDegrees[i][1] < 0:
+                    isNegative = True
+            if listOfIndexesAndDegrees[0][1] < 0 or listOfIndexesAndDegrees[0][1] >= len(arr) or isNegative:
+                return []
+            for i in range(1, listOfIndexesAndDegrees[0][1] + 1):
+                matrix[listOfIndexesAndDegrees[0][0]][listOfIndexesAndDegrees[i][0]] = 1
+                matrix[listOfIndexesAndDegrees[i][0]][listOfIndexesAndDegrees[0][0]] = 1
+                listOfIndexesAndDegrees[i][1] = listOfIndexesAndDegrees[i][1] - 1
+            listOfIndexesAndDegrees[0][1] = 0
+            sort_in_reverse_order(listOfIndexesAndDegrees)
     else:
-        return -1	
-
-# Funkcja tworząca graf k-regularny
-# Przyjmuje k - stopień pojedyńczego wierzchołka, numOfVertices - liczbę wierzchołków
-# Zwraca macierz lub -1 jeśli nie można utworzyć macierzy
- def generate_k_regular_graph(k, numOfVertices):
-    # Inicjalizacja pustej tablicy do przechowywania stopni wierzchołków
+        return []
+		
+def generate_k_regular_graph(k, numOfVertices):
+    
+    """
+        Function creates a k regular graph.
+        :param k: an integer which is a degree of each vertex
+        :param numOfVertices: an integer which describes a number of vertices
+        :return matrix: an array of arrays which represents a graph
+    """
+    
     arr = []
-    # Przypisanie do tablicy odpowiednich stopni wierzchołków
     for i in range(numOfVertices):
         arr.append(k)
-    # Zwraca funkcję tworzącą graf dla zadanego ciągu graficznego
     return create_graph_from_seq(arr)
-		
-# Funkcja randomizująca graf
-# Przyjmuje graph - graf zadany macierzą sąsiedztwa, number - ilość randomizacji
-# Funkcja nic nie zwraca
+	
 def randomize(graph, number):
-    # Randomizacja jest wykonywana określoną liczbę razy
-    for rands in range(number):
-        # Zmienna pomocnicza służąca do określenia liczby iteracji, jeżeli dopuszczalna liczba iteracji zostanie przekroczona randomizacja zostanie zakończona
-        i = 0
-        # Zmienna pomocnicza potrzebna do losowania liczb
-        size = len(graph)-1
-        # Losowanie wierzchołków pierwszej krawędzi
-        firstIdx = random.randint(0, size)
-        secondIdx = random.randint(0, size)
-        # Dostosowywanie wierzchołków pierwszej krawędzi
-        # Jeżeli nie można dostosować wierzchołków program zostanie przerwany przez przekroczenie liczby dopuszczalnych iteracji
-        while graph[firstIdx][secondIdx] != 1:
-            firstIdx = random.randint(0, size)
+    
+    """
+        Function randomize a graph by changing a vertices ab and cd to ad and bc.
+        :param graph: an array of arrays which represents the graph
+        :param number: an integer which represents a number of randomizations
+        :return : None
+    """
+    
+    if len(graph) > 0:
+        for rands in range(number):
             i = 0
-            while firstIdx == secondIdx:
-                secondIdx = random.randint(0, size)
-                i = i + 1
+            size = len(graph)-1
+            firstIdx = random.randint(0, size)
+            secondIdx = random.randint(0, size)
+            while graph[firstIdx][secondIdx] != 1:
+                firstIdx = random.randint(0, size)
+                i = 0
+                while firstIdx == secondIdx:
+                    secondIdx = random.randint(0, size)
+                    i = i + 1
+                    if i == 100:
+                        break
                 if i == 100:
                     break
             if i == 100:
-                break
-        if i == 100:
-            print("Couldn't randomize graph!")
-            return
-        i = 0
-        # Losowanie wierzchołków drugiej krawędzi
-        thirdIdx = random.randint(0, size)
-        fourthIdx = random.randint(0, size)
-        # Dostosowanie wierzchołków drugiej krawędzi
-        while thirdIdx == firstIdx or thirdIdx == secondIdx or graph[thirdIdx][fourthIdx] != 1:
+                print("Couldn't randomize graph!")
+                return
+            i = 0
             thirdIdx = random.randint(0, size)
-            while thirdIdx == fourthIdx or fourthIdx == firstIdx:
-                fourthIdx = random.randint(0, size)
-                i = i + 1
+            fourthIdx = random.randint(0, size)
+            while thirdIdx == firstIdx or thirdIdx == secondIdx or graph[thirdIdx][fourthIdx] != 1:
+                thirdIdx = random.randint(0, size)
+                while thirdIdx == fourthIdx or fourthIdx == firstIdx:
+                    fourthIdx = random.randint(0, size)
+                    i = i + 1
+                    if i == 100:
+                        break
                 if i == 100:
                     break
             if i == 100:
-                break
-        if i == 100:
-            print("Couldn't randomize graph!")
-            return
-        #print("firstIdx = " + str(firstIdx) + " secondIdx = " + str(secondIdx) + " thirdIdx = " + str(thirdIdx) + " fourthIdx = " + str(fourthIdx))
-        # Warunki porównujące indeksy nie dopuszczają do sytuacji zapisania 1 na diagonali, pozostałe warunki sprawdzają czy nie ma krawędzi w miejscach gdzie miała powstać nowa krawędź
-        if firstIdx != fourthIdx and firstIdx != secondIdx and thirdIdx != fourthIdx and secondIdx != thirdIdx and graph[firstIdx][fourthIdx] == 0 and graph[secondIdx][thirdIdx] == 0:
-            graph[firstIdx][secondIdx] = 0
-            graph[secondIdx][firstIdx] = 0
-            graph[firstIdx][fourthIdx] = 1
-            graph[fourthIdx][firstIdx] = 1
-            graph[thirdIdx][fourthIdx] = 0
-            graph[fourthIdx][thirdIdx] = 0
-            graph[secondIdx][thirdIdx] = 1
-            graph[thirdIdx][secondIdx] = 1
-			
-# Funkcja przeszukująca graf w głąb
-# Przyjmuje numer iteracji, wierzchołek, macierz sąsiedztwa i stos reprezentowany przez tablicę
-# Funkcja nic nie zwraca
+                print("Couldn't randomize graph!")
+                return
+            #print("firstIdx = " + str(firstIdx) + " secondIdx = " + str(secondIdx) + " thirdIdx = " + str(thirdIdx) + " fourthIdx = " + str(fourthIdx))
+            if firstIdx != fourthIdx and firstIdx != secondIdx and thirdIdx != fourthIdx and secondIdx != thirdIdx and graph[firstIdx][fourthIdx] == 0 and graph[secondIdx][thirdIdx] == 0:
+                graph[firstIdx][secondIdx] = 0
+                graph[secondIdx][firstIdx] = 0
+                graph[firstIdx][fourthIdx] = 1
+                graph[fourthIdx][firstIdx] = 1
+                graph[thirdIdx][fourthIdx] = 0
+                graph[fourthIdx][thirdIdx] = 0
+                graph[secondIdx][thirdIdx] = 1
+                graph[thirdIdx][secondIdx] = 1
+				
 def components_r(nr, v, graph, comp):
+    
+    """
+        Function represents implementation of DFS algorithm.
+        :param nr: an integer which represents a number of component
+        :param v: an integer which represents a number of the vertex
+        :param graph: a dictionary in which keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge 
+        :param comp: an array which stores numbers, that numbers represents an index of each component
+        :return : None.
+    """
+    
     for j in range(len(graph.get(v))):
-        # Jeżeli jakiś wierzchołek nie był wcześniej odwiedzony to następuje przepisanie wartości z wierzchołka z którego przyszliśmy
         if comp[graph.get(v)[j]-1] == -1:
             comp[graph.get(v)[j]-1] = nr
             components_r(nr, graph.get(v)[j], graph, comp)
 			
-# Funkcja wyznaczająca spójne składowe
-# Przyjmuje graf w postaci macierzy sąsiedztwa
-# Funkcja nic nie zwraca
 def components(graph):
-    # Zmienna oznaczająca nr spójnej składowej
+    
+    """
+        Function creates and prints a list of graph components.
+        :param graph: a dictionary in which keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+        :return : None.
+    """
+    
     nr = 0
-    # Tablica oznaczająca wszystkie wierzchołki jako nieodwiedzone
     comp = [-1 for i in range(len(graph))]
     for i in range(len(graph)):
-        # Jeżeli wierzchołek jest nieodwiedzony to inkrementujemy jego wartość
         if comp[i] == -1:
             nr = nr + 1
-            # Przypisanie ilości odwiedzeń danego wierzchołka
             comp[i] = nr
-            # Przeszukiwanie w głąb dla danego wierzchołka
             components_r(nr, i+1, graph, comp)
-    # Licznik odwiedzeń
     counter = 0
-    # Słownik, w którym do ilości odwiedzeń przypisywany jest indeks wierzchołka
     dicto = {}
-    # Utworzenie kluczy w słowniku, wartości są aktualnie pustymi tablicami
     for i in range(len(comp)):
         if comp[i] != counter:
             counter = comp[i]
             dicto[counter] = []
-    # Uzupełnienie tablic w słowniku
     for i in range(len(comp)):
         dicto[comp[i]].append(i+1)
-    # Sortowanie kluczy słownika
     sorted_dict = collections.OrderedDict(sorted(dicto.items()))
-    # Wypisanie posortowanego słownika
     temp = ""
     for i in range(1, len(sorted_dict)+1):
         temp = temp + str(i) + ") "
@@ -334,134 +337,176 @@ def components(graph):
             temp = temp + str(elem) + " "
         print(temp)
         temp = ""
-    # Wyszukanie najdłuższej ścieżki poprzez sprawdzanie długości tablic dla poszczególnych odwiedzeń
     longest = -1
     longest_dict_idx = 0
     for i in range(1, len(sorted_dict)+1):
         if len(sorted_dict[i]) > longest:
             longest = len(sorted_dict[i])
             longest_dict_idx = i
-    # Sformatowane wypisanie rezultatu
     print("Najwieksza skladowa ma numer " + str(longest_dict_idx) + ".")
 	
-# Funkcje wyznaczająca cykl Eulera
-# Funkcja przyjmuje stos reprezentowany przez tablicę, który służy do przechowywania numerów wierzchołków, indeks reprezentujący wierzchołek, macierz będącą grafem
-def find_euler_cycle(cycle, idx, graph):
-    # Przejście po wszystkich krawędziach wychodzących z wierzchołka idx
+def getNumberOfComponents(graph):
+    
+    """
+        Function creates a dictionary of graph components. It returns a length of the dictionary 
+        which represents the number of components.
+        :param graph: a dictionary in which keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+        :return len(sorted_dict): an integer which represents a numbre of components.
+    """
+    
+    nr = 0
+    comp = [-1 for i in range(len(graph))]
+    for i in range(len(graph)):
+        if comp[i] == -1:
+            nr = nr + 1
+            comp[i] = nr
+            components_r(nr, i+1, graph, comp)
+    counter = 0
+    dicto = {}
+    for i in range(len(comp)):
+        if comp[i] != counter:
+            counter = comp[i]
+            dicto[counter] = []
+    for i in range(len(comp)):
+        dicto[comp[i]].append(i+1)
+    sorted_dict = collections.OrderedDict(sorted(dicto.items()))
+    return len(sorted_dict)
+	
+def find_euler_cycle(cycle, idx, graph, isolatedVertices):
+    
+    """
+        Function returns an array which represents Euler cycle.
+        :param cycle: an array which stores an indexes of vertices
+        :param idx: an integer which represents an index of vertex
+        :param graph: an array of arrays which represents a graph
+        :param isolatedVertices: an integer which represents a number of isolated components
+        :return : None.
+    """
+    
     for j in range(len(graph[idx])):
-        # Jeżeli jest krawędź to ją wymazuje
         if graph[idx][j] != 0:
             graph[idx][j] = 0
             graph[j][idx] = 0
-            # Rekurencyjne wywołanie funkcji dla wierzchołka na drugim końcu krawędzi
-            find_euler_cycle(cycle, j, graph)
-    # Wrzucenie na stos wierzchołka po wymazaniu wszystkich krawędzi wychodzących z niego
+            if getNumberOfComponents(from_matrix_neighbour_to_list(graph)) - isolatedVertices > 1:
+                if not 1 in graph[j] and not 1 in graph[idx]:
+                    isolatedVertices = isolatedVertices + 1
+                    cycle.append(j+1)
+                    cycle.append(idx+1)
+                    return
+                elif not 1 in graph[j] and 1 in graph[idx]:
+                    graph[idx][j] = 1
+                    graph[j][idx] = 1
+                else:
+                    isolatedVertices = isolatedVertices + 1
+                    find_euler_cycle(cycle, j, graph, isolatedVertices)
+            else:
+                find_euler_cycle(cycle, j, graph, isolatedVertices)
     cycle.append(idx+1)
 	
-# Funkcja zwracająca losowy ciąg graficzny o zadanej długości
-# Funkcja przyjmuję liczbę wyznaczającą ilość wierzchołków tworzonego grafu
 def prepare_random_vertices(numberOfVertices):
-    # Inicjalizacja tablicy wierzchołków wartościami -1
+    
+    """
+         Function creates a degree sequence which contains Euler cycle.
+         :param numberOfVertices: an integer which represents a length of generated array
+         :return vertices: an array which represents a degree sequence.
+    """
+    
     vertices = [-1 for i in range(numberOfVertices)]
-    # Dla każdego indeksu losowana jest liczba reprezentująca stopień wierzchołka
     for i in range(numberOfVertices):
         randNum = random.randint(1, numberOfVertices)
         while (randNum % 2 != 0 or randNum == numberOfVertices):
             randNum = random.randint(1, numberOfVertices)
         vertices[i] = randNum
+        if i == numberOfVertices - 1:
+            copy = vertices.copy()
+            if degree_seq(copy) == False:
+                vertices = prepare_random_vertices(numberOfVertices)
     return vertices
 	
-# Funkcja tworząca losowy graf eulerowski
-# Funkcja nic nie zwraca
 def generate_euler_graph(numberOfVertices):
-    # Jeżeli graf jest zbudowany z mniej niż 3 wierzchołków to nie można utworzyć cyklu Eulera
+    
+    """
+        Function generates random Euler graph with given number of vertices.
+        :param numberOfVertices: an integer which specify a length of an array
+        :return : None.
+    """
+    
     if numberOfVertices < 3:
         print(" ")
         return
-    # Losowanie ciągu graficznego o zadanej długości
     vertices = prepare_random_vertices(numberOfVertices)
-    # Utworzenie grafu na podstawie wylosowanego ciągu graficznego
+    #graph = from_list_to_matrix_neighbour({1: [2,6], 2: [1,3,5,6], 3: [2,4,5,6], 4: [3,5], 5: [2,3,4,6], 6: [1,2,3,5]})
+    #graph = from_list_to_matrix_neighbour({1: [2,3,9,10], 2: [1,3,9,10], 3: [1,2,4,8,9,10], 4: [3,5,6,7,8,9], 5: [4,6,7,8], 6: [4,5,7,8], 7: [4,5,6,8], 8: [3,4,5,6,7,9], 9: [1,2,3,4,8,10], 10: [1,2,3,9]})
+    #graph = from_list_to_matrix_neighbour({1: [2,3,4,5], 2: [1,5,6,7], 3: [1,4], 4: [1,3], 5: [1,2], 6: [2,7], 7: [2,6]})
     graph = create_graph_from_seq(vertices)
-    # Jeżeli graf został utworzony to go wypisujemy w formie listy
-    if graph != -1:
-        print(from_matrix_neighbour_to_list(graph))
-    # Jeżeli graf nie został za pierwszym razem utworzony to algorytm próbuje do skutku    
-    while graph == -1:
+    while getNumberOfComponents(from_matrix_neighbour_to_list(graph)) != 1:
         vertices = prepare_random_vertices(numberOfVertices)
         graph = create_graph_from_seq(vertices)
-        if graph != -1:
-            print(from_matrix_neighbour_to_list(graph))
-    # Inicjalizacja tablicy przechowującej ścieżkę Eulera
+    create_graph_visualization(np.matrix(graph))
+    #print(from_matrix_neighbour_to_list(graph))
     cycle = []
-    # Wyznaczenie ścieżki Eulera dla wylosowanego grafu
-    find_euler_cycle(cycle, 0, graph)
-    # Inicjalizacja stringa do sformatowanego wypisania ścieżki
+    find_euler_cycle(cycle, 0, graph, 0)
     path = ""
-    # Kolejne elementy ścieżki wypisujemy wg. sugerowanego formatu
     for i in range(len(cycle)):
         if i == 0:
-            path = path + str(cycle[i])
+            path = path + str(cycle[len(cycle)-1])
         else:
-            path = path + " - " + str(cycle[i])
-    # Wypisanie ścieżki Eulera
+            path = path + " - " + str(cycle[len(cycle)-1-i])
     print(path)
-    
-# Zmodyfikowany algorytm przechodzenia grafu w głąb
-# Pozwala znaleźć ścieżkę Hamiltona w grafie jeżeli taka istnieje
-# Jako parametry przyjmuje numer odwiedzanego wierzchołka, listę sąsiedztwa, 
-# tablice z informacją o odwiedzonych wierzchołkach, 
-# stos przechowujący numery odwiedzonych wierzchołków
+	
 def modified_components_r(v, graph, comp, stack):
+    
+    """
+        Function checks if there is a Hamilton cycle in the graph or not.
+        :param v: number of vertex
+        :param graph: a dictionary in which keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+        :param comp: an array which contains an information about visited vertices
+        :param stack: an array which contains an indexes of visited vertices
+        :return : None.
+    """
+    
     for i in graph.get(v):
-        # Sprawdzenie czy wierzchołek nie był odwiedzony
         if comp[i-1] == -1:
-            # Oznaczenie wierzchołka jako odwiedzonego
             comp[i-1] = 1
-            # Dodanie wierzchołka na stos
             stack.append(i)
-            # Jeżeli długość stosu jest równa ilości wierzchołków w grafie
             if len(stack) == len(graph):
-                # Sprawdzenie czy istnieje krawędź z pierwszego wierzchołka na stosie do ostatniego
                 if not stack[0] in graph.get(i):
-                    # Jeżeli nie to następuje usunięcie ostatniego wierzchołka ze stosu
                     tmp = stack.pop()
                     comp[tmp-1] = -1
                 else:
-                    # Jeżeli taka krawędź istnieje to następuje ponowne dodanie pierwszego wierzchołka ze stosu
                     stack.append(stack[0])
             else:
-                # Jeżeli stos jest mniejszy niż ilość wierzchołków w grafie to następuje rekurencyjne wywołanie procedury
                 modified_components_r(i, graph, comp, stack)
-                # Ścieżka hamiltona w grafie ma o 1 wierzchołek więcej od wierzchołków grafu
-                # Bez tego warunku nawet przy poprawnie znalezionej ścieżce algorytm nie zatrzymywałby się i zwracał nieprawidłowy wynik
-                if len(stack) <= len(graph): 
+                if len(stack) <= len(graph): # Ścieżka hamiltona w grafie ma o 1 wierzchołek więcej od wierzchołków grafu
                     tmp = stack.pop()
                     comp[tmp-1] = -1
-                    
-# Funkcja wypisująca ścieżkę Hamiltona występującą w grafie
-# Jako argument przyjmuje graf w formie listy sąsiedztwa
+					
 def find_hamilton_cycle(graph):
-    # Oznaczenie wszystkich wierzchołków jako nieodwiedzone
-    comp = [-1 for i in range(len(graph))]
-    # Inicjalizacja pustego stosu służącego do przechowywania numerów wierzchołków
-    stack = []
-    # Rozpoczęcie algorytmu od pierwszego wierzchołka
-    for i in range(len(graph)):
-        if comp[i] == -1:
-            comp[i] = 1
-            stack.append(i+1)
-            modified_components_r(1, graph, comp, stack)
-    # Jeżeli stos zawiera o jeden wierzchołek więcej od grafu to jest ścieżką Hamiltona
-    if len(stack) == len(graph)+1:
-        # Inicjalizacja stringa przechowującego informację
-        tmpStr = "["
-        # Dodawanie wierzchołków do stringa zgodnie z formatem
-        for i in range(len(stack)):
-            if i < len(stack)-1:
-                tmpStr = tmpStr + str(stack[i]) + " - "
-            else:
-                tmpStr = tmpStr + str(stack[i]) + "]"
-        # Wypisanie napisu
-        print(tmpStr)
-    else: # W przeciwnym wypadku wypisanie informacji że taka ścieżka nie istnieje
-        print("No hamilton cycle in this graph!")
+    
+    """
+        Function looks for a Hamilton cycle in the given graph. It prints out the Hamilton cycle based on the vertices from 
+        the stack or prints the information that there is no Hamilton cycle in the graph.
+        :param graph: a dictionary in which keys are numbers of graph vertex and values
+                    are lists of other vertexes connected with them by edge
+        :return : None.
+    """
+    if len(graph) < 20 and getNumberOfComponents(graph) == 1:
+        comp = [-1 for i in range(len(graph))]
+        stack = []
+        for i in range(len(graph)):
+            if comp[i] == -1:
+                comp[i] = 1
+                stack.append(i+1)
+                modified_components_r(1, graph, comp, stack)
+        if len(stack) == len(graph)+1:
+            tmpStr = "["
+            for i in range(len(stack)):
+                if i < len(stack)-1:
+                    tmpStr = tmpStr + str(stack[i]) + " - "
+                else:
+                    tmpStr = tmpStr + str(stack[i]) + "]"
+            print(tmpStr)
+        else:
+            print("No hamilton cycle in this graph!")
