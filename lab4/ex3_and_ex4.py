@@ -45,22 +45,26 @@ def from_list_to_neighbour_matrix(list):
 
 def add_randomized_weights_to_digraph(G, min, max):
     neigh_matrix = from_list_to_neighbour_matrix(G)
+    weight_matrix = from_list_to_neighbour_matrix(G)
     size = len(neigh_matrix)
     for i in range(size):
         for j in range(size):
             if neigh_matrix[i][j] == 1:
                 tmp = random.randint(min, max)
-                while tmp == 0:
-                    tmp = random.randint(min, max)
-                neigh_matrix[i][j] = tmp
-    return neigh_matrix
+                # commented out, becouse we allow "0" as weight
+                # while tmp == 0:
+                #     tmp = random.randint(min, max)
+                weight_matrix[i][j] = tmp
+            else:
+                weight_matrix[i][j] = None
+    return neigh_matrix, weight_matrix
 
 
 def bellman_ford_algorithm(G, src):
     connections = []
     for u in range(len(G)):
         for v in range(len(G[0])):
-            if G[u][v] != 0:
+            if G[u][v] != None:
                 connections.append([u, v, G[u][v]])
 
     vertices = len(G)
@@ -92,31 +96,15 @@ def bellman_ford_algorithm(G, src):
 
     return distance
 
-n = 5
-p = 0.5
-test_digraph = generate_random_strongly_coherent_digraph(n, p)
-print(test_digraph)
-matrix_with_weights = add_randomized_weights_to_digraph(test_digraph, -3, 5)
-print(matrix_with_weights)
+#ex 3 part 1
+# n = 5
+# p = 0.5
+# test_digraph = generate_random_strongly_coherent_digraph(n, p)
+# print(test_digraph)
+# neigh_matrix, weight_matrix = add_randomized_weights_to_digraph(test_digraph, -3, 5)
+# print(neigh_matrix)
+# print(weight_matrix)
 
-# digraph = [
-#     [0, -1, -4],
-#     [4, 0, 0],
-#     [0, 2, 0]
-# ]
-
-# digraph = [
-#     [0, 6, 3, 0, -1, 0, 0],
-#     [10, 0, -5, -4, 4, 0, 4],
-#     [0, 0, 0, 0, 0, 2, 0],
-#     [0, 5, 0, 0, 0, 0, 9],
-#     [0, 0, 0, 0, 0, 0, -4],
-#     [0, 9, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 4, 0]
-# ]
-#
-# for i in range(len(digraph)):
-#     bellman_ford_algorithm(digraph, i)
 
 from collections import defaultdict
 
@@ -140,31 +128,79 @@ def dijkstra_algorithm(G, modifiedG, src):
         is_included_in_spt[cur_vert] = True
 
         for vertex in range(vertices):
-            if (is_included_in_spt[vertex] == False) and (distance[vertex] > (distance[cur_vert] + modifiedG[cur_vert][vertex])) and (G[cur_vert][vertex] != 0):
+            if (is_included_in_spt[vertex] == False) and (distance[vertex] > (distance[cur_vert] + modifiedG[cur_vert][vertex])) and (G[cur_vert][vertex] != None):
                 distance[vertex] = distance[cur_vert] + modifiedG[cur_vert][vertex]
 
-    print("w\t\tdist")
-    for i in range(vertices):
-        print("%d\t\t%d" % (i, distance[i]))
+    # print("w\t\tdist")
+    # for i in range(vertices):
+    #     print("%d\t\t%d" % (i, distance[i]))
 
 
 digraph = [
-    [0, 6, 3, 0, -1, 0, 0],
-    [10, 0, -5, -4, 4, 0, 4],
-    [0, 0, 0, 0, 0, 2, 0],
-    [0, 5, 0, 0, 0, 0, 9],
-    [0, 0, 0, 0, 0, 0, -4],
-    [0, 9, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 4, 0]
+    [None, -1, -4],
+    [4, None, None],
+    [None, 2, None]
 ]
 
 # ex3:
-bell_digraph = []
-for i in range(len(digraph)):
-    bell_digraph.append(bellman_ford_algorithm(digraph, i))
-# macierz najkrótszych ścieżek, element w wierszu w i kolumnie k oznacza długość najkrótszej ścieżki od wierzchołka w do k
-print(bell_digraph)
 
-#
-# def johnson_algorithm(G):
-#     return
+def solve_bellman_ford(digraph):
+    bell_digraph = []
+    for i in range(len(digraph)):
+        check = bellman_ford_algorithm(digraph, i)
+        if check:
+            bell_digraph.append(check)
+        else:
+            return False
+    # macierz najkrótszych ścieżek, element w wierszu w i kolumnie k oznacza długość najkrótszej ścieżki od wierzchołka w do k
+    return bell_digraph
+
+
+def add_s(G):
+    vertices = len(G)
+    weight_matrix = []
+    for i in range(vertices):
+        weight_matrix.append([])
+        for j in range(vertices):
+            weight_matrix[i].append(G[i][j])
+    for i in range(vertices):
+        weight_matrix[i].append(None)
+    additional_row = [0] * vertices
+    additional_row.append(None)
+    weight_matrix.append(additional_row)
+    return weight_matrix
+
+
+def johnson_algorithm(G):
+    Gs = add_s(G)
+    h = bellman_ford_algorithm(Gs, len(Gs)-1)
+    if not h:
+        print("ERR")
+        return
+    else:
+        print(h)
+        new_weights = []
+        for i in range(len(Gs)):
+            new_weights.append([])
+            for j in range(len(Gs)):
+                if Gs[i][j] != None:
+                    new_weights[i].append(Gs[i][j] + h[i] - h[j])
+                else:
+                    new_weights[i].append(None)
+        print(new_weights)
+
+        D = []
+        for i in range(len(G)):
+            D.append([])
+            for j in range(len(G)):
+                D[i].append(new_weights[i][j])
+        print(D)
+
+        #tylko teraz dorzucić tu dijkstrę i powinno śmigać
+
+
+
+johnson_algorithm(digraph)
+
+
+
