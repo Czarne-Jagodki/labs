@@ -1,4 +1,7 @@
-import ex1, numpy as np
+import ex1
+import numpy as np
+import random
+
 """
 Nie dziala dla pustych list sasiedztwa
 """
@@ -15,6 +18,7 @@ def DFS_Visit(v, G, d, f, t):
     #print("AFTER"+ str(t))
     return t
 
+
 def components_R(nr, v, G_Trans, comp):
     try:
         if G_Trans[v] == []:
@@ -25,6 +29,8 @@ def components_R(nr, v, G_Trans, comp):
                 components_R(nr,neighbour_v, G_Trans, comp)
     except:
         print("COMPONENT ERROR")
+
+
 def revert_matrix_values(list_neighbours):
     #print(matrix)
     #list_from_matrix = ex1.from_matrix_neighbour_to_list(matrix)
@@ -44,6 +50,7 @@ def revert_matrix_values(list_neighbours):
     #     print(len(row[0]))
 
     #print(incidence_matrix)
+
 
 def kosaraju(G):
     d = {}
@@ -66,12 +73,12 @@ def kosaraju(G):
     #print(G)
     #print(G_trans)
     #print(f)
-    print(dict( sorted(f.items(),key=lambda item: item[1],reverse=True)))
-    print(comp)
+    # print(dict( sorted(f.items(),key=lambda item: item[1],reverse=True)))
+    # print(comp)
     edges = G_trans
-    print(edges)
+    # print(edges)
     for v in dict( sorted(f.items(),key=lambda item: item[1],reverse=True)).keys():
-        print(v)
+        # print(v)
         #print(comp[v])
         try:
             if comp[v] == -1:
@@ -85,14 +92,17 @@ def kosaraju(G):
     return comp
 
 
+# n = 10
+# p = 0.5
+# matrix = ex1.rand_digraph_with_probability(n,p)
+# list_matrix = ex1.from_matrix_neighbour_to_list(matrix)
+#
+# revert_matrix_values(list_matrix)
+#
+# result = kosaraju(list_matrix)
+# print(list_matrix)
+# print(result)
 
-n = 10
-p = 0.5
-matrix = ex1.rand_digraph_with_probability(n,p)
-list_matrix = ex1.from_matrix_neighbour_to_list(matrix)
 
-revert_matrix_values(list_matrix)
 
-result = kosaraju(list_matrix)
-print(list_matrix)
-print(result)
+

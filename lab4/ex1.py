@@ -32,7 +32,7 @@ def print_matrix(matrix):
         print(i, end='. ')
         print(row)
 
-import ex2
+#import ex2
 import numpy as np
 def from_list_to_matrix_neighbour(list):
     """
