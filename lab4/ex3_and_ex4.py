@@ -2,10 +2,57 @@ import kosaraju as kosoraju
 import ex1 as ex1
 import random as random
 
+def print_neigh_matrix_in_decent_way(G):
+    """
+    This function prints matrix that represents weights of edges in digraph in formatted,
+    easy-to-read way and it replaces None with single dot (that means there is no connection
+    betweet these two vertexes)
+    can be also used to print shortest-paths matrix, althogh there is no None issue, it still can split rows
+    into separated lines instead of printing it as extra long one line string
+    :param G: matrix containing value of weights if there is connection from one to another vertex and None if there is not
+    :return: this function returns nothing, just prints the matrix
+    """
+    def change_none_into_dot(el):
+        if el == None:
+            return '.'
+        else:
+            return str(el)
+
+    print('[')
+    for i in range(len(G)):
+        line = '    ['
+        for j in range(len(G)-1):
+            line += change_none_into_dot(G[i][j]) + ', '
+        line += change_none_into_dot(G[i][len(G)-1]) + ']'
+        print(line)
+    print(']')
+
+
+def convert_to_neighbour_and_weight_matrix(G):
+    """
+    Tris function converts matrix containing weights between edges and None(if there is no connection between vertices)
+    to two separate matrixes, first of them is neighbours matrix with 1 if there is edge from i to j vertex
+    and 0 if there is not, and second of them with weights for those edges
+    :param G: matrix containing value of weights if there is connection from one to another vertex and None if there is not
+    :return: two matrixes, one being neighbour matrix and another one being weights matrix
+    """
+    neigh_matrix = []
+    weight_matrix = []
+    for i in len(G):
+        for j in len(G):
+            if G[i][j] != None:
+                neigh_matrix[i].append[1]
+                weight_matrix[i].append[G[i][j]]
+            else:
+                neigh_matrix[i].append[0]
+                weight_matrix[i].append[0]
+    return neigh_matrix, weight_matrix
+
+
 def check_if_is_strongly_coherent(list_matrix):
     """
     Function checks whether graph is strongly coherent or not
-    :param list_matrix:
+    :param list_matrix: list of neighbours but reversed to the entry list
     :return: boolean - false if graph is not strongly coherent, true if it is
     """
     kos = kosoraju.kosaraju(list_matrix)
@@ -100,9 +147,12 @@ def bellman_ford_algorithm(G, src):
     vertices = len(G)
     edges = len(connections)
 
+    #initialize distance array with max possible distances and 0 for given vertex - src
     distance = [float("Inf")] * vertices
     distance[src] = 0
 
+    #do relax for every edge done n-1 times (n-number of vertexes)
+    #if there is no negative cycle, it should result with an array of shortest possible paths
     for i in range(vertices - 1):
         for j in range(edges):
             x = connections[j][0]
@@ -111,14 +161,17 @@ def bellman_ford_algorithm(G, src):
             if distance[x] + weight < distance[y]:
                 distance[y] = distance[x] + weight
 
+    #check if has negative cycle, if so - communicate that and return
     for i in range(edges):
         x = connections[i][0]
         y = connections[i][1]
         weight = connections[i][2]
         if distance[x] != float("Inf") and distance[x] + weight < distance[y]:
-            # print("Graf zawiera ujemny cykl!")
+            #if we managed to find shorter path than before, that means there is a nagative cycle
+            print("Graf zawiera ujemny cykl!")
             return False
 
+    #if there is no negative cycle, return array of distances
     return distance
 
 
@@ -137,7 +190,7 @@ def solve_bellman_ford(digraph):
             bell_digraph.append(check)
         else:
             return False
-    # macierz najkrótszych ścieżek, element w wierszu w i kolumnie k oznacza długość najkrótszej ścieżki od wierzchołka w do k
+    # matrix of shortest possible paths, value in row w and column k is the shortest path from vertex w to k
     return bell_digraph
 
 
@@ -205,11 +258,14 @@ def johnson_algorithm(G):
     or, if there is negative cycle in G digraph, then the function just shows a message and returns
     """
     Gs = add_s(G)
+    #first add extra vertex with edges leading to every other vertex with weights 0
     h = bellman_ford_algorithm(Gs, len(Gs)-1)
     if not h:
+        #check if there is negative cycle, if so - return
         print("It's not possible to use johnson's algorithm for this digraph, becouse it has a negative cycle!")
         return
     else:
+        #first scale weights to make them positive ( negative weights make it impossible to use dijkstra later)
         new_weights = []
         for i in range(len(Gs)):
             new_weights.append([])
@@ -219,6 +275,8 @@ def johnson_algorithm(G):
                 else:
                     new_weights[i].append(None)
 
+        #we get rid of the extra vertex we added before - we don't need it anymore
+        #also, we create an array of distances to use later
         reduced_weights = []
         D =[]
         for i in range(len(G)):
@@ -229,9 +287,13 @@ def johnson_algorithm(G):
                 reduced_weights[i].append(new_weights[i][j])
 
         for i in range(len(G)):
+            #there are no negative weights so we can use dijkstra
+            #we run dijkstra multiply times for every vertex
             distances = dijkstra_algorithm(reduced_weights, i)
             for j in range(len(G)):
+                #we calculate final distances by scaling dijkstra desults again
                 D[i][j] = distances[j] - h[i] + h[j]
+        # matrix of shortest possible paths, value in row w and column k is the shortest path from vertex w to k
         return D
 
 
@@ -243,12 +305,14 @@ if __name__ == "__main__":
     while not bf_solved:
         number_of_tries += 1
         test_digraph = generate_random_strongly_coherent_digraph(5, 0.5)
-        neigh_matrix, weight_matrix = add_randomized_weights_to_digraph(test_digraph, -3, 5)
+        neigh_matrix, weight_matrix = add_randomized_weights_to_digraph(test_digraph, -5, 10)
         bf_solved = solve_bellman_ford(weight_matrix)
         if bf_solved:
-            print("Managed to generate randomized stongly coherent digraph with random weights with no negative cycle in ", number_of_tries, "tries")
-            print(weight_matrix)
-            print(bf_solved)
+            # print("Managed to generate randomized stongly coherent digraph with random weights with no negative cycle in ", number_of_tries, "tries")
+            print_neigh_matrix_in_decent_way(weight_matrix)
+            print_neigh_matrix_in_decent_way(bf_solved)
+            j_solved = johnson_algorithm(weight_matrix)
+            print_neigh_matrix_in_decent_way(j_solved)
 
 
     #ex4
@@ -270,10 +334,10 @@ if __name__ == "__main__":
 
     print('EX 4')
     johnsolved = johnson_algorithm(digraph1)
-    print(johnsolved)
+    print_neigh_matrix_in_decent_way(johnsolved)
 
     johnsolved = johnson_algorithm(digraph2)
-    print(johnsolved)
+    print_neigh_matrix_in_decent_way(johnsolved)
 
 
 

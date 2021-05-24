@@ -155,9 +155,9 @@ list_matrix = ex1.from_matrix_neighbour_to_list(matrix)
 # revert_matrix_values(list_matrix)
 #
 result = kosaraju(list_matrix)
-print(list_matrix)
-print(result)
-print(group_result(result))
+# print(list_matrix)
+# print(result)
+# print(group_result(result))
 
 # list_my = {
 #           1 : [2],
