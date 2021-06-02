@@ -14,37 +14,45 @@ def draw_random_network(layers, edges, lastIdx):
     """
     
     nx_digraph = nx.DiGraph();
+    # słowniki na pozycje i etykiety
     labels = {}
     pos = {}
     x = 0
     y = 5
+    # zmienna pomocnicza do sprawdzania czy numer warstwy jest parzysty
     counter = 0
     for elem in layers:
         for i in range(len(layers[elem])):
             nx_digraph.add_node(layers[elem][i])
             labels[layers[elem][i]] = layers[elem][i]
+            # ustawienie pozycji źródła i ujśca
             if layers[elem][i] == 0 or layers[elem][i] == lastIdx:
                 pos[layers[elem][i]] = (x, -5)
             else:
                 if counter % 2 == 0:
+                    # warstwy nieparzyste są bardziej rozłożone i zaczynają się niżej
                     if i == 0:
                         pos[layers[elem][i]] = (x, y*(-0.2)*2)
                     else:
                         pos[layers[elem][i]] = (x, y*i*2.25)
                 else:
+                    # warstwy parzyste są mniej rozłożone
                     pos[layers[elem][i]] = (x, y*i)
+        # zmiana pozycji x dla kolejnej warstwy
         x = x + 20
         counter = counter + 1
-        
+    
+    # dodanie krawędzi
     for elem in edges:
         nx_digraph.add_edge(elem[0], elem[1], weight = edges[elem])
     
+    # rysowanie wykresu
     plt.figure(1, figsize=(12, 12))
     nx.draw(nx_digraph, pos=pos, linewidths=1, node_size=500, node_color='#08cbcf', alpha=0.95, labels=labels)
     nx.draw_networkx_edge_labels(nx_digraph, pos=pos, edge_labels=edges)
     plt.show()
     plt.clf()
-	
+    
 def is_empty(graph, idx):
     
     """
@@ -59,7 +67,7 @@ def is_empty(graph, idx):
         if graph[i][idx] == 1:
             isEmpty = False
     return isEmpty
-	
+    
 def is_any_empty(graph, layer):
     
     """
@@ -74,7 +82,7 @@ def is_any_empty(graph, layer):
         if isAnyEmpty:
             break
     return isAnyEmpty
-	
+    
 def create_random_flow_network(N):
     
     """
@@ -84,11 +92,11 @@ def create_random_flow_network(N):
                         layers, which is a dictionary: keys represent number of each layer, values are a lists which contain indexes of vertices.
                         The last element is edges which is a dictionary in which key is a tuple. 
                         It contains vertices which are ends of the edge. Value is a capacity of each edge.
-
+        :raise Exception: in case input parameter N is less than 2 or greater than 4
     """
     
-    if N < 2:
-        return None, None, None
+    if N < 2 or N > 4:
+        raise Exception("Invalid parameter, N should be in range [2, 4]!")
     
     # tablica przechowująca ilość wierzchołków w każdej z warstw pośrednich
     numberOfVerticesInEachLayer = []
@@ -176,17 +184,18 @@ def create_random_flow_network(N):
                 edges[(i,j)] = graph[i][j]
     
     return graph, layers, edges
-	
+    
 def BFS(graph):
     
     """
         Function is an implementation of BFS algorithm.
         :param graph:  an array of arrays which represents flow network.
         :return track: an array of integers which represents indexes of vertices.
+        :raise Exception: in case graph equal to None
     """
     
     if graph == None:
-        return []
+        raise Exception("Invalid input, it's not a graph!")
     distances = []
     predecessors = []
     for i in range(len(graph)):
@@ -202,6 +211,7 @@ def BFS(graph):
                     distances[i] = distances[v] + 1
                     predecessors[i] = v
                     queue.append(i)
+    # tablica na indeksy wierzchołków składających się na trase
     track = []
     track.insert(0, len(graph)-1)
     idx = len(graph)-1
@@ -211,7 +221,7 @@ def BFS(graph):
     if len(track) == 1:
         track = []
     return track
-	
+    
 def draw_max_flow(layers, edges, flow, lastIdx):
     
     """
@@ -221,50 +231,61 @@ def draw_max_flow(layers, edges, flow, lastIdx):
         :param flow: it's a dictionary in which key is a tuple. It contains vertices which are ends of the edge. Value is an integer which represents a flow in each edge.
         :param lastIdx: an integer which represent the index of sink.
         :return: None
+        :raise Exception: in case any input parameter equal to None
     """
     
     if layers == None or edges == None or flow == None or lastIdx == None:
-        return
+        raise Exception("Invalid input! One or more than one of the parameters is None!")
     nx_digraph = nx.DiGraph();
+    # słowniki na pozycje i etykiety dla wierzchołków i krawędzi
     labels = {}
     pos = {}
     edge_labels = {}
     edge_colors = []
     x = 0
     y = 5
+    # zmienna pomocnicza do sprawdzania czy numer warstwy jest parzysty
     counter = 0
     for elem in layers:
         for i in range(len(layers[elem])):
             nx_digraph.add_node(layers[elem][i])
             labels[layers[elem][i]] = layers[elem][i]
+            # ustawienie pozycji źródła i ujśca
             if layers[elem][i] == 0 or layers[elem][i] == lastIdx:
                 pos[layers[elem][i]] = (x, -5)
             else:
                 if counter % 2 == 0:
+                    # warstwy nieparzyste są bardziej rozłożone i zaczynają się niżej
                     if i == 0:
                         pos[layers[elem][i]] = (x, y*(-0.2)*2)
                     else:
                         pos[layers[elem][i]] = (x, y*i*2.25)
                 else:
+                    # warstwy parzyste są mniej rozłożone
                     pos[layers[elem][i]] = (x, y*i)
+        # zmiana pozycji x dla kolejnej warstwy
         x = x + 20
         counter = counter + 1
         
+    # dodawanie krawędzi
     for elem in edges:
+        # jeżeli wartość przepływu na krawędzi jest niezerowa krawędź kolorowana jest na czerwono
         if flow[elem] > 0:
             edge_colors.append('red')
         else:
             edge_colors.append('black')
         nx_digraph.add_edge(elem[0], elem[1], weight = edges[elem])
+        # dodanie etykiety do krawędzi
         edge_labels[elem] = str(flow[elem]) + '/' + str(edges[elem])
     
+    # rysowanie wykresu
     plt.figure(1, figsize=(12, 12))
     plt.rcParams.update({'font.size': 42})
     nx.draw(nx_digraph, pos=pos, edge_color = edge_colors, linewidths=1, node_size=500, node_color='#08cbcf', alpha=0.95, labels=labels)
     nx.draw_networkx_edge_labels(nx_digraph, pos=pos, edge_labels=edge_labels)
     plt.show()
     plt.clf()
-	
+    
 def Ford_Fulkerson(pack):
     
     """
@@ -275,37 +296,39 @@ def Ford_Fulkerson(pack):
                      The last element is edges which is a dictionary in which key is a tuple. 
                      It contains vertices which are ends of the edge. Value is a capacity of each edge.
         :return: None
-        
+        :raise Exception: in case graph equal to None
     """
     
     if pack[0] == None:
-        return
+        raise Exception("Invali input, it's not a graph!")
     graph = pack[0]
-    residuum = [row[:] for row in graph]
+    # przechowywanie sieci rezydualnej
+    residualGraph = [row[:] for row in graph]
     flow = {}
-    for i in range(len(residuum)):
-        for j in range(len(residuum)):
+    for i in range(len(residualGraph)):
+        for j in range(len(residualGraph)):
             if graph[i][j] != 0:
                 flow[(i,j)] = 0
-    track = BFS(residuum)
+    track = BFS(residualGraph)
     while len(track) > 0:
         min = 11
         for j in range(len(track)-1):
-            if residuum[track[j]][track[j+1]] < min:
-                min = residuum[track[j]][track[j+1]]
+            if residualGraph[track[j]][track[j+1]] < min:
+                min = residualGraph[track[j]][track[j+1]]
         for j in range(len(track)-1):
             if graph[track[j]][track[j+1]] != 0:
                 flow[(track[j],track[j+1])] = flow[(track[j],track[j+1])] + min
-                residuum[track[j]][track[j+1]] = residuum[track[j]][track[j+1]] - min
-                if residuum[track[j]][track[j+1]] == 0:
-                    residuum[track[j+1]][track[j]] = min
+                residualGraph[track[j]][track[j+1]] = residualGraph[track[j]][track[j+1]] - min
+                if residualGraph[track[j]][track[j+1]] == 0:
+                    residualGraph[track[j+1]][track[j]] = min
             else:
                 flow[(track[j+1],track[j])] = flow[(track[j+1],track[j])] - min
-                residuum[track[j]][track[j+1]] = residuum[track[j]][track[j+1]] - min
-                if residuum[track[j]][track[j+1]] == 0:
-                    residuum[track[j+1]][track[j]] = min
-        track = BFS(residuum)
+                residualGraph[track[j]][track[j+1]] = residualGraph[track[j]][track[j+1]] - min
+                if residualGraph[track[j]][track[j+1]] == 0:
+                    residualGraph[track[j+1]][track[j]] = min
+        track = BFS(residualGraph)
     
+    # wyznaczenie maksymalnego przepływu na podstawie sumy przepływów wpływających do źródła
     maxFlow = 0
     for elem in flow:
         if elem[1] == len(graph)-1:
@@ -313,3 +336,4 @@ def Ford_Fulkerson(pack):
 
     draw_max_flow(pack[1], pack[2], flow, len(graph)-1)
     print("Maksymalny przepływ na sieci wynosi: " + str(maxFlow) + ".")
+    
